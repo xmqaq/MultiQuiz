@@ -894,42 +894,7 @@ body {
     opacity: 0.8;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-}
-
-.btn-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #3d4245 100%);
-}
-
-.btn-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    color: white;
-}
-
-.btn-info:hover {
-    background: linear-gradient(135deg, #148ea1 0%, #117a8b 100%);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
-    margin-top: 10px;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
-}
+/* 重复的按钮样式定义已移除，避免样式冲突 */
 
 /* 移动端适配 */
 @media (max-width: 768px) {
