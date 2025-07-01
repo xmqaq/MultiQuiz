@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CISP-PTE 练习题库</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🛡️ CISP-PTE 练习题库</h1>
+            <p>网络安全练习平台 Author:xmqaq</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="import">📁 导入题库</button>
+            <button class="tab-btn" data-tab="practice">📚 总题库</button>
+            <button class="tab-btn" data-tab="exam">✏️ 模拟答题</button>
+            <button class="tab-btn" data-tab="wrong">❌ 错题本</button>
+            <button class="tab-btn" data-tab="stats">📊 统计分析</button>
+        </nav>
+
+        <!-- 导入题库页面 -->
+        <div class="tab-content active" id="import">
+            <div class="import-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <h3>拖拽文件到此处或点击选择</h3>
+                    <p>支持 Excel (.xlsx, .xls) 和 JSON 配置文件</p>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.json" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">选择文件</button>
+                </div>
+                <div class="import-info">
+                    <h4>📊 Excel表格格式要求：</h4>
+                    <ul>
+                        <li>第一列：题目内容</li>
+                        <li>第二列：选项A</li>
+                        <li>第三列：选项B</li>
+                        <li>第四列：选项C</li>
+                        <li>第五列：选项D</li>
+                        <li>第六列：正确答案</li>
+                    </ul>
+                    <h4>⚙️ JSON配置文件说明：</h4>
+                    <ul>
+                        <li>支持导入系统自动生成的配置文件</li>
+                        <li>配置文件包含完整的题库数据和元信息</li>
+                        <li>导入后会自动验证数据格式</li>
+                        <li>推荐用于题库备份和快速恢复</li>
+                    </ul>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- 总题库页面 -->
+        <div class="tab-content" id="practice">
+            <div class="practice-header">
+                <h2>📚 题库浏览</h2>
+                <div class="practice-controls">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="搜索题目关键词...">
+                        <button class="btn btn-secondary" onclick="searchQuestions()">🔍 搜索</button>
+                        <button class="btn btn-outline" onclick="clearSearch()">✖️ 清空</button>
+                    </div>
+                    <div class="library-actions">
+                        <button class="btn btn-info" onclick="showLibraryInfo()">📊 题库信息</button>
+                        <button class="btn btn-warning" onclick="exportQuestions()">📤 导出题库</button>
+                        <button class="btn btn-danger" onclick="clearLibrary()">🗑️ 清空题库</button>
+                    </div>
+                </div>
+            </div>
+            <div class="questions-list" id="questionsList">
+                <div class="no-data">请先导入题库文件</div>
+            </div>
+        </div>
+
+        <!-- 模拟答题页面 -->
+        <div class="tab-content" id="exam">
+            <div class="exam-setup" id="examSetup">
+                <h2>✏️ 模拟考试设置</h2>
+                <div class="setup-options">
+                    <div class="option-group">
+                        <label>题目数量：</label>
+                        <select id="examCount">
+                            <option value="20">20题</option>
+                            <option value="50">50题</option>
+                            <option value="100">100题</option>
+                            <option value="all">全部题目</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label>考试时间：</label>
+                        <select id="examTime">
+                            <option value="30">30分钟</option>
+                            <option value="60">60分钟</option>
+                            <option value="90">90分钟</option>
+                            <option value="120">120分钟</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="startExam()">开始考试</button>
+                </div>
+            </div>
+            <div class="exam-content" id="examContent" style="display: none;">
+                <div class="exam-header">
+                    <div class="exam-info">
+                        <span id="currentQuestion">1</span> / <span id="totalQuestions">20</span>
+                    </div>
+                    <div class="timer" id="timer">60:00</div>
+                </div>
+                <div class="question-content" id="questionContent"></div>
+                <div class="exam-controls">
+                    <button class="btn btn-secondary" onclick="prevQuestion()">上一题</button>
+                    <button class="btn btn-secondary" onclick="nextQuestion()">下一题</button>
+                    <button class="btn btn-danger" onclick="submitExam()">提交答卷</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 错题本页面 -->
+        <div class="tab-content" id="wrong">
+            <div class="wrong-header">
+                <h2>❌ 错题本</h2>
+                <button class="btn btn-danger" onclick="clearWrongQuestions()">清空错题本</button>
+            </div>
+            <div class="wrong-questions" id="wrongQuestions">
+                <div class="no-data">暂无错题记录</div>
+            </div>
+        </div>
+
+        <!-- 统计分析页面 -->
+        <div class="tab-content" id="stats">
+            <div class="stats-header">
+                <h2>📊 学习统计</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>总题数</h3>
+                    <div class="stat-value" id="totalQuestionsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>已练习</h3>
+                    <div class="stat-value" id="practicedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>正确率</h3>
+                    <div class="stat-value" id="accuracyRate">0%</div>
+                </div>
+                <div class="stat-card">
+                    <h3>错题数</h3>
+                    <div class="stat-value" id="wrongCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1632 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-01T01:47:04.630Z",
+  "totalQuestions": 180,
+  "questions": [
+    {
+      "id": 1,
+      "question": "向有限的空间输入超长的字符串是哪一种攻击手段（）",
+      "optionA": "缓冲区溢出",
+      "optionB": "网络监听",
+      "optionC": "拒绝服务",
+      "optionD": "IP欺骗",
+      "answer": "A"
+    },
+    {
+      "id": 2,
+      "question": "在以下认证方式中，最常用的认证方式是（）",
+      "optionA": "基于账户名／口令认证",
+      "optionB": "基于摘要算法认证",
+      "optionC": "基于PKI认证",
+      "optionD": "基于数据库认证",
+      "answer": "A"
+    },
+    {
+      "id": 3,
+      "question": "抵御电子邮箱入侵措施中，不正确的是（）",
+      "optionA": "不用生日做密码",
+      "optionB": "不要使用少于5位的密码",
+      "optionC": "不要使用纯数字",
+      "optionD": "自己做服务器",
+      "answer": "D"
+    },
+    {
+      "id": 4,
+      "question": "针对数据包过滤和应用网关技术存在的缺点而引入的防火墙技术，这是（）防火墙的特点",
+      "optionA": "包过滤型",
+      "optionB": "应用级网关型",
+      "optionC": "复合型防火墙",
+      "optionD": "代理服务型",
+      "answer": "D"
+    },
+    {
+      "id": 5,
+      "question": "Windows有三种类型的事件日志，分别是（）",
+      "optionA": "系统日志、应用程序日志、安全日志",
+      "optionB": "系统日志、应用程序日志、事件日志",
+      "optionC": "安全日志、应用程序日志、事件日志",
+      "optionD": "系统日志、应用程序日志、DNS日志",
+      "answer": "A"
+    },
+    {
+      "id": 6,
+      "question": "以下哪种方法不能找到CDN的网站的真实IP（）",
+      "optionA": "使用世界各地服务器对域名进行PING检测",
+      "optionB": "使用Wireshark对本地网络请求进行抓包分析",
+      "optionC": "查询历史DNS记录",
+      "optionD": "利用SSL证书寻找真实IP",
+      "answer": "B"
+    },
+    {
+      "id": 7,
+      "question": "风险评估的三个要素（）",
+      "optionA": "政策，结构和技术",
+      "optionB": "组织，技术和信息",
+      "optionC": "硬件，软件和人",
+      "optionD": "资产，威胁和脆弱性",
+      "answer": "D"
+    },
+    {
+      "id": 8,
+      "question": "信息网络安全（风险）评估的方法（）",
+      "optionA": "定性评估与定量评估相结合",
+      "optionB": "定性评估",
+      "optionC": "定量评估",
+      "optionD": "定点评估",
+      "answer": "A"
+    },
+    {
+      "id": 9,
+      "question": "PDR模型与访问控制的主要区别（）",
+      "optionA": "PDR把安全对象看作一个整体",
+      "optionB": "PDR作为系统保护的第一道防线",
+      "optionC": "PDR采用定性评估与定量评估相结合",
+      "optionD": "PDR的关键因素是人",
+      "answer": "A"
+    },
+    {
+      "id": 10,
+      "question": "从事危害网络安全的活动，或者提供专门用于从事危害网络安全活动的程序、工具，或者为他人从事危害网络安全的活动提供技术支持、广告推广、支付结算等帮助，尚不构成犯罪的，由（）没收违法所得，处五日以下拘留，可以并处五万元以上五十万元以下罚款；",
+      "optionA": "国家安全局",
+      "optionB": "国家网信部门",
+      "optionC": "公安机关",
+      "optionD": "国务院",
+      "answer": "C"
+    },
+    {
+      "id": 11,
+      "question": "利用FTP进行文件传输时的主要安全问题存在于（）",
+      "optionA": "匿名登录不需要密码",
+      "optionB": "破坏程序能够在客户端运行",
+      "optionC": "破坏程序能够在服务器端运行",
+      "optionD": "登录的用户名和密码会明文传输到服务器端",
+      "answer": "D"
+    },
+    {
+      "id": 12,
+      "question": "最早的计算机网络与传统的通信网络最大的区别是（）",
+      "optionA": "计算机网络带宽和速度大大提高",
+      "optionB": "计算机网络采用了电路交换技术",
+      "optionC": "计算机网络采用了分组交换技术",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 13,
+      "question": "关于80年代Mirros蠕虫危害的描述，哪句话是错误的（）",
+      "optionA": "该蠕虫利用Unix系统上的漏洞传播",
+      "optionB": "窃取用户的机密信息，破坏计算机数据文件",
+      "optionC": "占用了大量的计算机处理器的时间，导致拒绝服务",
+      "optionD": "大量的流量堵塞了网络，导致网络瘫痪",
+      "answer": "B"
+    },
+    {
+      "id": 14,
+      "question": "以下关于DOS攻击的描述，哪句话是正确的（）",
+      "optionA": "不需要侵入受攻击的系统",
+      "optionB": "以窃取目标系统上的机密信息为目的",
+      "optionC": "导致目标系统无法处理正常用户的请求",
+      "optionD": "如果目标系统没有漏洞，远程攻击就不可能成功",
+      "answer": "C"
+    },
+    {
+      "id": 15,
+      "question": "许多黑客攻击都是利用软件实现中的缓冲区溢出的漏洞，对于这一威胁，最可靠的解决方案是（）",
+      "optionA": "安装防火墙",
+      "optionB": "安装入侵检测系统",
+      "optionC": "给系统安装最新的补丁",
+      "optionD": "安装防病毒软件",
+      "answer": "C"
+    },
+    {
+      "id": 16,
+      "question": "防火墙最主要被部署在（）位置",
+      "optionA": "网络边界",
+      "optionB": "骨干线路",
+      "optionC": "重要服务器",
+      "optionD": "桌面终端",
+      "answer": "A"
+    },
+    {
+      "id": 17,
+      "question": "一个网站存在命令执行漏洞，由于服务器不能连外网，这时我们可以利用（）方式将文件上传到服务器",
+      "optionA": "FTP",
+      "optionB": "PowerShell",
+      "optionC": "vbs",
+      "optionD": "echo",
+      "answer": "D"
+    },
+    {
+      "id": 18,
+      "question": "文件包含中伪协议使用（）进行写入一句话木马",
+      "optionA": "http://",
+      "optionB": "php://input",
+      "optionC": "php://filter",
+      "optionD": "phar://",
+      "answer": "B"
+    },
+    {
+      "id": 19,
+      "question": "下面哪一个情景属于审计（Audit）（）",
+      "optionA": "用户依照系统提示输入用户名和口令",
+      "optionB": "用户在网络上共享了自己编写的一份Office文档，并设定哪些用户可以阅读，哪些用户可以修改",
+      "optionC": "用户使用加密软件对自己编写的Office文档进行加密，以阻止其他人得到这份拷贝后看到文档中的内容",
+      "optionD": "某个人尝试登录到你的计算机中，但是口令输入的不对，系统提示口令错误，并将这次失败的登录过程纪录在系统日志中",
+      "answer": "D"
+    },
+    {
+      "id": 20,
+      "question": "以网络为本的知识文明人们所关心的主要安全是（）",
+      "optionA": "人身安全",
+      "optionB": "社会安全",
+      "optionC": "信息安全",
+      "optionD": "地球安全",
+      "answer": "C"
+    },
+    {
+      "id": 21,
+      "question": "下列关于木马反弹端口技术的描述中，错误的是（）",
+      "optionA": "反弹端口技术中，由木马服务端程序主动连接木马客户端程序",
+      "optionB": "反弹端口技术中，木马客户端的IP地址必须是公网IP地址",
+      "optionC": "反弹端口技术中，由跳板计算机将变动后的IP地址主动通知木马服务端程序",
+      "optionD": "反弹端口技术中，木马的服务端程序可穿透所在内网的包过滤防火墙",
+      "answer": "C"
+    },
+    {
+      "id": 22,
+      "question": "黑客的主要攻击手段包括（）",
+      "optionA": "社会工程攻击、蛮力攻击和技术攻击",
+      "optionB": "人类工程攻击、武力攻击及技术攻击",
+      "optionC": "社会工程攻击、系统攻击及技术攻击",
+      "optionD": "人类工程攻击、蛮力攻击和技术攻击",
+      "answer": "A"
+    },
+    {
+      "id": 23,
+      "question": "从统计的情况看，造成危害最大的黑客攻击是（）",
+      "optionA": "漏洞攻击",
+      "optionB": "蠕虫攻击",
+      "optionC": "病毒攻击",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 24,
+      "question": "第一个计算机病毒出现在（）",
+      "optionA": "40年代",
+      "optionB": "70年代",
+      "optionC": "90年代",
+      "optionD": "80年代",
+      "answer": "B"
+    },
+    {
+      "id": 25,
+      "question": "不属于数据库加密方式的是（）",
+      "optionA": "库外加密",
+      "optionB": "库内加密",
+      "optionC": "硬件/软件加密",
+      "optionD": "专用中间件加密",
+      "answer": "D"
+    },
+    {
+      "id": 26,
+      "question": "邮件炸弹攻击主要是（）",
+      "optionA": "破坏被攻击者邮件服务器",
+      "optionB": "添满被攻击者邮箱",
+      "optionC": "破坏被攻击者邮件客户端",
+      "optionD": "猜解受害者的邮箱口令",
+      "answer": "B"
+    },
+    {
+      "id": 27,
+      "question": "逻辑炸弹通常是通过（）",
+      "optionA": "必须远程控制启动执行，实施破坏",
+      "optionB": "指定条件或外来触发启动执行，实施破坏",
+      "optionC": "通过管理员控制启动执行，实施破坏",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 28,
+      "question": "1996年上海某寻呼台发生的逻辑炸弹事件，造事者被判\"情节轻微，无罪释放\"是因为（）",
+      "optionA": "证据不足",
+      "optionB": "没有造成破坏",
+      "optionC": "法律不健全",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 29,
+      "question": "扫描工具（）",
+      "optionA": "只能作为攻击工具",
+      "optionB": "只能作为防范工具",
+      "optionC": "既可作为攻击工具也可以作为防范工具",
+      "optionD": "既不能作为攻击工具也不能作为防范工具",
+      "answer": "C"
+    },
+    {
+      "id": 30,
+      "question": "PHP提供以下哪些函数来避免SQL注入（）",
+      "optionA": "mysql_real_escape_string",
+      "optionB": "escapeshellarg",
+      "optionC": "htmlentities",
+      "optionD": "htmlspecialchars",
+      "answer": "A"
+    },
+    {
+      "id": 31,
+      "question": "MetasploitFramework中，可以使用（）来枚举本地局域网中的所有活跃主机",
+      "optionA": "dir_scanner",
+      "optionB": "empty_udp",
+      "optionC": "arp_sweep",
+      "optionD": "arp_neighbo",
+      "answer": "C"
+    },
+    {
+      "id": 32,
+      "question": "信息战的战争危害较常规战争的危害（）",
+      "optionA": "轻",
+      "optionB": "重",
+      "optionC": "不一定",
+      "optionD": "中级",
+      "answer": "C"
+    },
+    {
+      "id": 33,
+      "question": "信息战的军人身份确认较常规战争的军人身份确认（）",
+      "optionA": "难",
+      "optionB": "易",
+      "optionC": "难说",
+      "optionD": "中级",
+      "answer": "A"
+    },
+    {
+      "id": 34,
+      "question": "互联网用户应在其网络正式联通之日起（）内，到公安机关办理国际联网备案手续",
+      "optionA": "三十日",
+      "optionB": "二十日",
+      "optionC": "十五日",
+      "optionD": "四十日",
+      "answer": "A"
+    },
+    {
+      "id": 35,
+      "question": "一般性的计算机安全事故和计算机违法案件可由（）受理",
+      "optionA": "案发地市级公安机关公共信息网络安全监察部门",
+      "optionB": "案发地当地县级（区、市）公安机关治安部门",
+      "optionC": "案发地市级公安机关治安部门",
+      "optionD": "案发地当地县级（区、市）公安机关公共信息网络安全监察部门",
+      "answer": "D"
+    },
+    {
+      "id": 36,
+      "question": "XXE漏洞可以做什么（）",
+      "optionA": "盗取用户Cookie",
+      "optionB": "读取服务器文件",
+      "optionC": "网络钓鱼",
+      "optionD": "获取用户浏览器信息",
+      "answer": "B"
+    },
+    {
+      "id": 37,
+      "question": "文件包含中%截断，对PHP版本有什么要求（）",
+      "optionA": "PHP版本>5.5.4",
+      "optionB": "PHP版本<5.5.4",
+      "optionC": "PHP版本<5.1.4",
+      "optionD": "PHP版本<5.3.4",
+      "answer": "D"
+    },
+    {
+      "id": 38,
+      "question": "《计算机病毒防治管理办法》是在哪一年颁布的（）",
+      "optionA": 1994,
+      "optionB": 1997,
+      "optionC": 2000,
+      "optionD": 1998,
+      "answer": "C"
+    },
+    {
+      "id": 39,
+      "question": "关于命令执行漏洞的利用描述错误的是（）",
+      "optionA": "System函数可以用来执行一个外部的应用程序，并将相应的执行结果输出",
+      "optionB": "Shell_exec：执行shell命令并返回输出的字符串",
+      "optionC": "Eval函数会将参数字符串作为系统程序代码来执行",
+      "optionD": "Exec函数可以用来执行一个外部的应用程序",
+      "answer": "C"
+    },
+    {
+      "id": 40,
+      "question": "在使用Sqlmap进行SQL注入时，我们会使用什么参数来爆所有的数据库名（）",
+      "optionA": "current-db",
+      "optionB": "dbs",
+      "optionC": "tables",
+      "optionD": "columns",
+      "answer": "B"
+    },
+    {
+      "id": 41,
+      "question": "传入我国的第一例计算机病毒是（）",
+      "optionA": "大麻病毒",
+      "optionB": "小球病毒",
+      "optionC": "1575病毒",
+      "optionD": "米开朗基罗病毒",
+      "answer": "B"
+    },
+    {
+      "id": 42,
+      "question": "我国是在（）年出现第一例计算机病毒",
+      "optionA": 1980,
+      "optionB": 1983,
+      "optionC": 1988,
+      "optionD": 1977,
+      "answer": "C"
+    },
+    {
+      "id": 43,
+      "question": "计算机病毒是（）",
+      "optionA": "计算机程序",
+      "optionB": "数据",
+      "optionC": "临时文件",
+      "optionD": "应用软件",
+      "answer": "A"
+    },
+    {
+      "id": 44,
+      "question": "通过修改HTTPHeaders中的哪个键值可以伪造来源网址（）",
+      "optionA": "X-Forwarded-For",
+      "optionB": "User-Agent",
+      "optionC": "Accept",
+      "optionD": "Referer",
+      "answer": "D"
+    },
+    {
+      "id": 45,
+      "question": "计算机病毒防治产品根据（）标准进行检验",
+      "optionA": "计算机病毒防治产品评级准测",
+      "optionB": "计算机病毒防治管理办法",
+      "optionC": "基于DOS系统的安全评级准则",
+      "optionD": "计算机病毒防治产品检验标准",
+      "answer": "A"
+    },
+    {
+      "id": 46,
+      "question": "边界防范的根本作用是（）",
+      "optionA": "对系统工作情况进行检验与控制，防止外部非法入侵",
+      "optionB": "对网络运行状况进行检验与控制，防止外部非法入侵",
+      "optionC": "对访问合法性进行检验与控制，防止外部非法入侵",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 47,
+      "question": "VPN是指（）",
+      "optionA": "虚拟的专用网络",
+      "optionB": "虚拟的协议网络",
+      "optionC": "虚拟的包过滤网络",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 48,
+      "question": "带VPN的防火墙的基本原理流程是（）",
+      "optionA": "先进行流量检查",
+      "optionB": "先进行协议检查",
+      "optionC": "先进行合法性检查",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 49,
+      "question": "ASPX的网站配置文件一般存放在哪个文件里（）",
+      "optionA": "conn.asp",
+      "optionB": "config.php",
+      "optionC": "web.config",
+      "optionD": "index.aspx",
+      "answer": "C"
+    },
+    {
+      "id": 50,
+      "question": "下列哪个方法不是HTTP协议的请求方法（）",
+      "optionA": "HEAD",
+      "optionB": "SELECT",
+      "optionC": "PUT",
+      "optionD": "OPTIONS",
+      "answer": "B"
+    },
+    {
+      "id": 51,
+      "question": "“QlTUCQVEU=”此段密文采用了那种加密方式（）",
+      "optionA": "MD5",
+      "optionB": "Base64",
+      "optionC": "AES",
+      "optionD": "DES",
+      "answer": "B"
+    },
+    {
+      "id": 52,
+      "question": "目前用户局域网内部区域划分通常通过（）实现",
+      "optionA": "物理隔离",
+      "optionB": "Vlan划分",
+      "optionC": "防火墙防范",
+      "optionD": "IP划分",
+      "answer": "B"
+    },
+    {
+      "id": 53,
+      "question": "防火墙的部署（）",
+      "optionA": "只需要在与Internet相连接的出入口设置",
+      "optionB": "在需要保护局域网络的所有出入口设置",
+      "optionC": "需要在出入口和网段之间进行部署",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 54,
+      "question": "RDP的端口号为（）",
+      "optionA": 3389,
+      "optionB": 3306,
+      "optionC": 1433,
+      "optionD": 443,
+      "answer": "A"
+    },
+    {
+      "id": 55,
+      "question": "防火墙是一个（）",
+      "optionA": "分离器、限制器、分析器",
+      "optionB": "隔离器、控制器、分析器",
+      "optionC": "分离器、控制器、解析器",
+      "optionD": "隔离器、控制器、解析器",
+      "answer": "A"
+    },
+    {
+      "id": 56,
+      "question": "目前的防火墙防范主要是（）",
+      "optionA": "主动防范",
+      "optionB": "被动防范",
+      "optionC": "不一定",
+      "optionD": "主动和被动防范",
+      "answer": "B"
+    },
+    {
+      "id": 57,
+      "question": "用户收到了一封可疑的电子邮件，要求用户提供银行账户及密码，这是属于何种攻击手段（）",
+      "optionA": "缓冲区溢出攻击",
+      "optionB": "钓鱼攻击",
+      "optionC": "暗门攻击",
+      "optionD": "DDos攻击",
+      "answer": "B"
+    },
+    {
+      "id": 58,
+      "question": "SQL注入时使用intouotfile进行写木马的操作，必须满足下列哪个选项最为准确（）",
+      "optionA": "支持联合查询",
+      "optionB": "必须知道网站的绝对路径",
+      "optionC": "支持联合查询并且知道网站的绝对路径",
+      "optionD": "不需要条件，可以随便写",
+      "answer": "C"
+    },
+    {
+      "id": 59,
+      "question": "永恒之蓝漏洞利用以下哪个端口（）",
+      "optionA": 3389,
+      "optionB": 21,
+      "optionC": 445,
+      "optionD": 3306,
+      "answer": "C"
+    },
+    {
+      "id": 60,
+      "question": "下列（）不是常见系统命令函数",
+      "optionA": "system()",
+      "optionB": "exec()",
+      "optionC": "assert()",
+      "optionD": "shell_exec()",
+      "answer": "C"
+    },
+    {
+      "id": 61,
+      "question": "当成功通过Metasploit黑进对方系统并获得system权限后，不能做什么操作",
+      "optionA": "屏幕截图",
+      "optionB": "键盘记录",
+      "optionC": "读写文件",
+      "optionD": "开关机",
+      "answer": "D"
+    },
+    {
+      "id": 62,
+      "question": "MSSQL的默认端口是（）",
+      "optionA": 3389,
+      "optionB": 3306,
+      "optionC": 1521,
+      "optionD": 1443,
+      "answer": "D"
+    },
+    {
+      "id": 63,
+      "question": "对网络系统进行渗透测试，通常是按什么顺序来进行的（）",
+      "optionA": "控制阶段、侦查阶段、入侵阶段",
+      "optionB": "入侵阶段、侦查阶段、控制阶段",
+      "optionC": "侦查阶段、入侵阶段、控制阶段",
+      "optionD": "侦查阶段、控制阶段、入侵阶段",
+      "answer": "C"
+    },
+    {
+      "id": 64,
+      "question": "下列哪项不属于同源策略的要求（）",
+      "optionA": "同端口",
+      "optionB": "同IP",
+      "optionC": "同域名",
+      "optionD": "同协议",
+      "answer": "B"
+    },
+    {
+      "id": 65,
+      "question": "CodeRed爆发于2001年7月，利用微软的IIS漏洞在Web服务器之间传播针对这一漏洞，微软早在2001年三月就发布了相关的补丁如果今天服务器仍然感染CodeRed，那么属于哪个阶段的问题（）",
+      "optionA": "微软公司软件的设计阶段的失误",
+      "optionB": "微软公司软件的实现阶段的失误",
+      "optionC": "系统管理员维护阶段的失误",
+      "optionD": "最终用户使用阶段的失误",
+      "answer": "C"
+    },
+    {
+      "id": 66,
+      "question": "现代主动安全防御的主要手段是（）",
+      "optionA": "探测、预警、监视、警报",
+      "optionB": "嘹望、烟火、巡更、敲梆",
+      "optionC": "调查、报告、分析、警报",
+      "optionD": "探测、预警、报告、、警报",
+      "answer": "A"
+    },
+    {
+      "id": 67,
+      "question": "古代主动安全防御的典型手段有（）",
+      "optionA": "探测、预警、监视、警报",
+      "optionB": "嘹望、烟火、巡更、敲梆",
+      "optionC": "调查、报告、分析、警报",
+      "optionD": "探测、预警、报告、、警报",
+      "answer": "B"
+    },
+    {
+      "id": 68,
+      "question": "Hydra工具中的-L参数的含义是（）",
+      "optionA": "指定单个密码",
+      "optionB": "指定一个密码字典",
+      "optionC": "指定一个用户名",
+      "optionD": "指定一个用户名字典",
+      "answer": "D"
+    },
+    {
+      "id": 69,
+      "question": "CSRF攻击不能做什么（）",
+      "optionA": "删除用户信息",
+      "optionB": "修改用户权限",
+      "optionC": "盗取用户凭证",
+      "optionD": "取消订单",
+      "answer": "C"
+    },
+    {
+      "id": 70,
+      "question": "以下查看linux系统内核版本是（）",
+      "optionA": "cat /porc/version",
+      "optionB": "uname –a",
+      "optionC": "cat /etc/passwd",
+      "optionD": "cat /release -a",
+      "answer": "B"
+    },
+    {
+      "id": 71,
+      "question": "1994年我国颁布的第一个与信息安全有关的法规是（）",
+      "optionA": "国际互联网管理备案规定",
+      "optionB": "计算机病毒防治管理办法",
+      "optionC": "网吧管理规定",
+      "optionD": "中华人民共和国计算机信息系统安全保护条例",
+      "answer": "D"
+    },
+    {
+      "id": 72,
+      "question": "网页病毒主要通过以下途径传播（）",
+      "optionA": "打电话",
+      "optionB": "文件交换",
+      "optionC": "网络浏览",
+      "optionD": "光盘",
+      "answer": "C"
+    },
+    {
+      "id": 73,
+      "question": "故意制作、传播计算机病毒等破坏性程序，影响计算机系统正常运行，后果严重的，将受到（）处罚",
+      "optionA": "处五年以下有期徒刑或者拘役",
+      "optionB": "拘留",
+      "optionC": "罚款",
+      "optionD": "警告",
+      "answer": "A"
+    },
+    {
+      "id": 74,
+      "question": "信息安全中PDR模型的关键因素是（）",
+      "optionA": "人",
+      "optionB": "技术",
+      "optionC": "模型",
+      "optionD": "客体",
+      "answer": "A"
+    },
+    {
+      "id": 75,
+      "question": "计算机网络最早出现在哪个年代（）",
+      "optionA": "20世纪50年代",
+      "optionB": "20世纪60年代",
+      "optionC": "20世纪80年代",
+      "optionD": "20世纪90年代",
+      "answer": "B"
+    },
+    {
+      "id": 76,
+      "question": "最早研究计算机网络的目的是（）",
+      "optionA": "直接的个人通信",
+      "optionB": "共享硬盘空间、打印机等设备",
+      "optionC": "共享计算资源",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 77,
+      "question": "哪一项不是命令执行漏洞的危害（）",
+      "optionA": "反弹SHELL",
+      "optionB": "继承WEB服务程序的权限，读写文件",
+      "optionC": "控制整个网站",
+      "optionD": "对服务器造成大流量攻击",
+      "answer": "D"
+    },
+    {
+      "id": 78,
+      "question": "下列那个选项不是上传功能常用安全监测机制（）",
+      "optionA": "客户端检查机制JavaScript验证",
+      "optionB": "服务的MIME检查验证",
+      "optionC": "服务端文件扩展名检查验证机制",
+      "optionD": "URL中是否包含一些特殊标签",
+      "answer": "D"
+    },
+    {
+      "id": 79,
+      "question": "口令机制通常用于（）",
+      "optionA": "认证",
+      "optionB": "标识",
+      "optionC": "注册",
+      "optionD": "授权",
+      "answer": "A"
+    },
+    {
+      "id": 80,
+      "question": "拒绝服务不包括以下哪一项（）",
+      "optionA": "DDoS",
+      "optionB": "畸形报文攻击",
+      "optionC": "Land攻击",
+      "optionD": "ARP攻击",
+      "answer": "D"
+    },
+    {
+      "id": 81,
+      "question": "SQL注入中=被过滤可以使用（）来代替",
+      "optionA": "AND",
+      "optionB": "&",
+      "optionC": "LIKE",
+      "optionD": "VS",
+      "answer": "C"
+    },
+    {
+      "id": 82,
+      "question": "路由设置是边界防范的（）",
+      "optionA": "基本手段之一",
+      "optionB": "根本手段",
+      "optionC": "无效手段",
+      "optionD": "有效手段",
+      "answer": "A"
+    },
+    {
+      "id": 83,
+      "question": "网络物理隔离是指（）",
+      "optionA": "两个网络间链路层在任何时刻不能直接通讯",
+      "optionB": "两个网络间网络层在任何时刻不能直接通讯",
+      "optionC": "两个网络间链路层、网络层在任何时刻都不能直接通讯",
+      "optionD": "两个网络间链路层、网络层在任何时刻都能直接通讯",
+      "answer": "C"
+    },
+    {
+      "id": 84,
+      "question": "第一次出现\"HACKER\"这个词是在（）",
+      "optionA": "BELL实验室",
+      "optionB": "麻省理工AI实验室",
+      "optionC": "AT&T实验室",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 85,
+      "question": "可能给系统造成影响或者破坏的人包括（）",
+      "optionA": "所有网络与信息系统使用者",
+      "optionB": "只有黑客",
+      "optionC": "只有跨客",
+      "optionD": "只有管理员",
+      "answer": "A"
+    },
+    {
+      "id": 86,
+      "question": "以下哪种攻击方式可以直接从外网访问内部系统（）",
+      "optionA": "CSRF",
+      "optionB": "SSRF",
+      "optionC": "XSRF",
+      "optionD": "ARP",
+      "answer": "B"
+    },
+    {
+      "id": 87,
+      "question": "以下哪项不是绕过XSS过滤的办法（）",
+      "optionA": "利用HTML标签的属性值",
+      "optionB": "利用空字符",
+      "optionC": "利用单引号双引号",
+      "optionD": "扰乱过滤规则",
+      "answer": "C"
+    },
+    {
+      "id": 88,
+      "question": "防火墙主要可以分为（）",
+      "optionA": "包过滤型、代理性、混合型",
+      "optionB": "包过滤型、系统代理型、应用代理型",
+      "optionC": "包过滤型、内容过滤型、混合型",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 89,
+      "question": "NAT是指（）",
+      "optionA": "网络地址传输",
+      "optionB": "网络地址转换",
+      "optionC": "网络地址跟踪",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 90,
+      "question": "VPN通常用于建立（）之间的安全通道",
+      "optionA": "总部与分支机构、与合作伙伴、与移动办公用户",
+      "optionB": "客户与客户、与合作伙伴、与远程用户",
+      "optionC": "总部与分支机构、与外部网站、与移动办公用户",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 91,
+      "question": "在安全区域划分中DMZ区通常用做（）",
+      "optionA": "数据区",
+      "optionB": "对外服务区",
+      "optionC": "重要业务区",
+      "optionD": "防火墙防范",
+      "answer": "B"
+    },
+    {
+      "id": 92,
+      "question": "存储型XSS一般会出现在网站的哪个位置（）",
+      "optionA": "URL位置",
+      "optionB": "搜索栏",
+      "optionC": "网站的留言板",
+      "optionD": "登陆框",
+      "answer": "C"
+    },
+    {
+      "id": 93,
+      "question": "过滤不严的网站会使用户绕过管理员登录验证，可能的万能密码是（）",
+      "optionA": "P@ssw0rd",
+      "optionB": "abc‘or 1=1--",
+      "optionC": "Administrator",
+      "optionD": "Or ‘1==1’",
+      "answer": "B"
+    },
+    {
+      "id": 94,
+      "question": "IP地址欺骗通常是（）",
+      "optionA": "黑客的攻击手段",
+      "optionB": "防火墙的专门技术",
+      "optionC": "IP通讯的一种模式",
+      "optionD": "交换机的专门技术",
+      "answer": "A"
+    },
+    {
+      "id": 95,
+      "question": "以下哪项不属于针对数据库的攻击（）",
+      "optionA": "特权提升",
+      "optionB": "强力破解弱口令或默认的用户名及口令",
+      "optionC": "SQL注入",
+      "optionD": "利用XSS漏洞攻击",
+      "answer": "D"
+    },
+    {
+      "id": 96,
+      "question": "电子商务交易必须具备抗抵赖性，目的在于防止（）",
+      "optionA": "一个实体假装另一个实体",
+      "optionB": "参与此交易的一方否认曾经发生过此次交易",
+      "optionC": "他人对数据进行非授权的修改、破坏",
+      "optionD": "信息从被监视的通信过程中泄露出去",
+      "answer": "B"
+    },
+    {
+      "id": 97,
+      "question": "从统计的资料看，内部攻击是网络攻击的（）",
+      "optionA": "次要攻击",
+      "optionB": "最主要攻击",
+      "optionC": "不是攻击源",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 98,
+      "question": "江泽民主席指出信息战的主要形式是（）",
+      "optionA": "电子战和计算机网络战",
+      "optionB": "信息攻击和网络攻击",
+      "optionC": "系统破坏和信息破坏",
+      "optionD": "心理战和网络战",
+      "answer": "A"
+    },
+    {
+      "id": 99,
+      "question": "广义地说，信息战是指敌对双方为达成各自的国家战略目标，为夺取（）在等各个领域的信息优势，运用信息和信息技术手段而展开的信息斗争",
+      "optionA": "政治、经济、国防、领土、文化、外交",
+      "optionB": "政治、经济、军事、科技、文化、外交",
+      "optionC": "网络、经济、信息、科技、文化、外交",
+      "optionD": "网络、经济、信息、土、文化、外交",
+      "answer": "B"
+    },
+    {
+      "id": 100,
+      "question": "狭义地说，信息战是指军事领域里的信息斗争它是敌对双方为争夺信息的（），通过利用、破坏敌方和保护己方的信息、信息系统而采取的作战形式",
+      "optionA": "占有权、控制权和制造权",
+      "optionB": "保存权、制造权和使用权",
+      "optionC": "获取权、控制权和使用权",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 101,
+      "question": "Unix系统中存放每个用户信息的文件是（）",
+      "optionA": "/sys/passwd",
+      "optionB": "/sys/password",
+      "optionC": "/etc/password",
+      "optionD": "/etc/passwd",
+      "answer": "D"
+    },
+    {
+      "id": 102,
+      "question": "TCP协议中表明已接收到SYN数据包，应返回哪种类型的数据包（）",
+      "optionA": "SYN-ACK",
+      "optionB": "SYN-2",
+      "optionC": "ACK",
+      "optionD": "RESYN",
+      "answer": "C"
+    },
+    {
+      "id": 103,
+      "question": "目前用户局域网内部区域划分通常通过（）实现",
+      "optionA": "物理隔离",
+      "optionB": "Vlan划分",
+      "optionC": "防火墙防范",
+      "optionD": "IP划分",
+      "answer": "B"
+    },
+    {
+      "id": 104,
+      "question": "SQLSever中可以使用哪个存储过程调用操作系统命令，添加系统账号（）",
+      "optionA": "xp_dirtree",
+      "optionB": "xp_shell",
+      "optionC": "xp_cmdshell",
+      "optionD": "xpdeletekey",
+      "answer": "C"
+    },
+    {
+      "id": 105,
+      "question": "对非军事DMZ而言，正确的解释是（）",
+      "optionA": "DMZ是一个真正可信的网络部分",
+      "optionB": "DMZ网络访问控制策略决定允许或禁止进入DMZ通信",
+      "optionC": "允许外部用户访问DMZ系统上合适的服务",
+      "optionD": "以上3项都是",
+      "answer": "D"
+    },
+    {
+      "id": 106,
+      "question": "（）是最常用的公钥密码算法",
+      "optionA": "RSA",
+      "optionB": "DSA",
+      "optionC": "椭圆曲线",
+      "optionD": "量子密码",
+      "answer": "A"
+    },
+    {
+      "id": 107,
+      "question": "（）属于Web中使用的安全协议",
+      "optionA": "PEM、SSL",
+      "optionB": "S-HTTP、S/MIME",
+      "optionC": "SSL、S-HTTP",
+      "optionD": "S/MIME、SSL",
+      "answer": "C"
+    },
+    {
+      "id": 108,
+      "question": "半连接(SYN)端口扫描技术显著的特点是（）",
+      "optionA": "不需要特殊权限",
+      "optionB": "不会在日志中留下任何记录",
+      "optionC": "不建立完整的TCP连接",
+      "optionD": "可以扫描UDP端口",
+      "answer": "C"
+    },
+    {
+      "id": 109,
+      "question": "计算机刑事案件可由（）受理",
+      "optionA": "案发地市级公安机关公共信息网络安全监察部门",
+      "optionB": "案发地市级公安机关治安部门",
+      "optionC": "案发地当地县级（区、市）公安机关公共信息网络安全监察部门",
+      "optionD": "案发地当地公安派出所",
+      "answer": "A"
+    },
+    {
+      "id": 110,
+      "question": "计算机信息系统发生安全事故和案件，应当（）在内报告当地公安机关公共信息网络安全监察部门",
+      "optionA": "8小时",
+      "optionB": "48小时",
+      "optionC": "36小时",
+      "optionD": "24小时",
+      "answer": "D"
+    },
+    {
+      "id": 111,
+      "question": "对计算机安全事故的原因的认定或确定由（）作出",
+      "optionA": "人民法院",
+      "optionB": "公安机关",
+      "optionC": "发案单位",
+      "optionD": "以上都可以",
+      "answer": "C"
+    },
+    {
+      "id": 112,
+      "question": "对发生计算机安全事故和案件的计算机信息系统，如存在安全隐患的，（）应当要求限期整改",
+      "optionA": "人民法院",
+      "optionB": "公安机关",
+      "optionC": "发案单位的主管部门",
+      "optionD": "以上都可以",
+      "answer": "B"
+    },
+    {
+      "id": 113,
+      "question": "APT常见的攻击手段不包括（）",
+      "optionA": "鱼叉攻击",
+      "optionB": "水坑攻击",
+      "optionC": "人身攻击",
+      "optionD": "社会工程学",
+      "answer": "C"
+    },
+    {
+      "id": 114,
+      "question": "众所周知，病毒有多种表现形式，某同事的windows主机上的office文件大面积被感染，请问哪一项不是文件型病毒的特点（）",
+      "optionA": "病毒以某种形式隐藏在主程序中，并不修改主程序",
+      "optionB": "以自身逻辑部分取代合法的引导程序模块，导致系统瘫痪",
+      "optionC": "文件型病毒可以通过检查主程序长度来判断其存在",
+      "optionD": "文件型病毒通常在运行主程序时进入内存",
+      "answer": "B"
+    },
+    {
+      "id": 115,
+      "question": "以下哪项不属于防止口令猜测的措施（）",
+      "optionA": "严格限定从一个给定的终端进行非法认证的次数",
+      "optionB": "确保口令不在终端上再现",
+      "optionC": "防止用户使用太短的口令",
+      "optionD": "使用机器产生的口令",
+      "answer": "B"
+    },
+    {
+      "id": 116,
+      "question": "下列不属于系统安全的技术是（）",
+      "optionA": "防火墙",
+      "optionB": "安装QQ",
+      "optionC": "认证",
+      "optionD": "防病毒",
+      "answer": "B"
+    },
+    {
+      "id": 117,
+      "question": "一家商业公司的网站发生黑客非法入侵和攻击事件后，应及时向哪一个部门报案（）",
+      "optionA": "公安部公共信息网络安全监察局及其各地相应部门",
+      "optionB": "国家计算机网络与信息安全管理中心",
+      "optionC": "互联网安全协会",
+      "optionD": "信息安全产业商会",
+      "answer": "A"
+    },
+    {
+      "id": 118,
+      "question": "在每天下午5点使用计算机结束时断开终端的连接属于（）",
+      "optionA": "外部终端的物理安全",
+      "optionB": "通信线的物理安全",
+      "optionC": "窃听数据",
+      "optionD": "网络地址欺骗",
+      "answer": "A"
+    },
+    {
+      "id": 119,
+      "question": "2003年上半年发生的较有影响的计算机及网络病毒是（）",
+      "optionA": "SARS",
+      "optionB": "SQL杀手蠕虫",
+      "optionC": "手机病毒",
+      "optionD": "小球病毒",
+      "answer": "B"
+    },
+    {
+      "id": 120,
+      "question": "为了保证系统日志可靠有效，以下哪一项不是日志必需具备的特征（）",
+      "optionA": "统一而精确地的时间",
+      "optionB": "全面覆盖系统资产",
+      "optionC": "包括访问源、访问目标和访问活动等重要信息",
+      "optionD": "可以让系统的所有用户方便的读取",
+      "answer": "D"
+    },
+    {
+      "id": 121,
+      "question": "主要用于加密机制的协议是（）",
+      "optionA": "HTTP",
+      "optionB": "FTP",
+      "optionC": "TELNET",
+      "optionD": "SSL",
+      "answer": "D"
+    },
+    {
+      "id": 122,
+      "question": "用户收到了一封可疑的电子邮件,要求用户提供银行账户及密码,这是属于何种攻击手段（）",
+      "optionA": "缓存溢出攻击",
+      "optionB": "钓鱼攻击",
+      "optionC": "暗门攻击",
+      "optionD": "DDOS攻击",
+      "answer": "B"
+    },
+    {
+      "id": 123,
+      "question": "WindowsNT和Windows2000系统能设置为在几次无效登录后锁定帐号,这可以防止（）",
+      "optionA": "木马",
+      "optionB": "暴力攻击",
+      "optionC": "IP欺骗",
+      "optionD": "缓存溢出攻击",
+      "answer": "B"
+    },
+    {
+      "id": 124,
+      "question": "口令是验证用户身份的最常用手段，以下哪一种口令的潜在风险影响范围最大（）",
+      "optionA": "长期没有修改的口令",
+      "optionB": "过短的口令",
+      "optionC": "两个人公用的口令",
+      "optionD": "设备供应商提供的默认口令",
+      "answer": "D"
+    },
+    {
+      "id": 125,
+      "question": "不属于常见的危险密码是（）",
+      "optionA": "跟用户名相同的密码",
+      "optionB": "使用生日作为密码",
+      "optionC": "只有4位数的密码",
+      "optionD": "10位的综合型密码",
+      "answer": "D"
+    },
+    {
+      "id": 126,
+      "question": "不属于计算机病毒防治的策略的是（）",
+      "optionA": "确认您手头常备一张真正“干净”的引导盘",
+      "optionB": "及时、可靠升级反病毒产品",
+      "optionC": "新购置的计算机软件也要进行病毒检测",
+      "optionD": "整理磁盘",
+      "answer": "D"
+    },
+    {
+      "id": 127,
+      "question": "《中华人民共和国网络安全法》中，网络安全事件应急预案应当按照事件发生后的（）、影响范围等因素对网络安全事件进行分级，并规定相应的应急处置措施",
+      "optionA": "时间",
+      "optionB": "地点",
+      "optionC": "等级保护",
+      "optionD": "后果",
+      "answer": "D"
+    },
+    {
+      "id": 128,
+      "question": "信息发送者使用（）进行数字签名",
+      "optionA": "己方的私钥",
+      "optionB": "己方的公钥",
+      "optionC": "对方的私钥",
+      "optionD": "对方的公钥",
+      "answer": "A"
+    },
+    {
+      "id": 129,
+      "question": "SQL杀手蠕虫病毒发作的特征是（）",
+      "optionA": "大量消耗网络带宽",
+      "optionB": "攻击个人PC终端",
+      "optionC": "破坏PC游戏程序",
+      "optionD": "攻击手机网络",
+      "answer": "A"
+    },
+    {
+      "id": 130,
+      "question": "当今IT的发展与安全投入，安全意识和安全手段之间形成（）",
+      "optionA": "安全风险屏障",
+      "optionB": "安全风险缺口",
+      "optionC": "管理方式的变革",
+      "optionD": "管理方式的缺口",
+      "answer": "B"
+    },
+    {
+      "id": 131,
+      "question": "信息安全等级保护制度是国家保障和促进信息化建设健康发展的一项基本制度，信息系统安全保护等级分为（）",
+      "optionA": "3 级",
+      "optionB": "4 级",
+      "optionC": "5 级",
+      "optionD": "6 级",
+      "answer": "C"
+    },
+    {
+      "id": 132,
+      "question": "监听网络流量获取密码，之后使用这个密码试图完成未经授权访问的攻击方式被称为（）",
+      "optionA": "穷举攻击",
+      "optionB": "字典攻击",
+      "optionC": "社会工程攻击",
+      "optionD": "重放攻击",
+      "answer": "D"
+    },
+    {
+      "id": 133,
+      "question": "根据我国信息安全管理体系，党政机关信息网络的安全保卫任务由下列哪个单位负责（）",
+      "optionA": "公安机关",
+      "optionB": "国家安全机关",
+      "optionC": "国家保密工作部门",
+      "optionD": "国家密码主管部门",
+      "answer": "B"
+    },
+    {
+      "id": 134,
+      "question": "DDOS攻击是利用（）进行攻击",
+      "optionA": "其他网络",
+      "optionB": "通讯握手过程问题",
+      "optionC": "中间代理",
+      "optionD": "不清楚",
+      "answer": "C"
+    },
+    {
+      "id": 135,
+      "question": "全国首例计算机入侵银行系统是通过（）",
+      "optionA": "安装无限MODEM进行攻击",
+      "optionB": "通过内部系统进行攻击",
+      "optionC": "通过搭线进行攻击",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 136,
+      "question": "黑客造成的主要安全隐患包括（）",
+      "optionA": "破坏系统、窃取信息及伪造信息",
+      "optionB": "攻击系统、获取信息及假冒信息",
+      "optionC": "进入系统、损毁信息及谣传信息",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 137,
+      "question": "江泽民主席指出信息战的主要形式是（）",
+      "optionA": "电子战和计算机网络战",
+      "optionB": "信息攻击和网络攻击",
+      "optionC": "系统破坏和信息破坏",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 138,
+      "question": "下面哪类设备常用于识别系统中存在的脆弱性（）",
+      "optionA": "防火墙",
+      "optionB": "IDS",
+      "optionC": "漏洞扫描器",
+      "optionD": "UTM",
+      "answer": "C"
+    },
+    {
+      "id": 139,
+      "question": "当备份一个应用程序系统的数据时，以下哪一项是应该首先考虑的关键性问题（）",
+      "optionA": "什么时候进行备份?",
+      "optionB": "在哪里进行备份?",
+      "optionC": "怎样存储备份?",
+      "optionD": "需要备哪些数据?",
+      "answer": "D"
+    },
+    {
+      "id": 140,
+      "question": "使网络服务器中充斥着大量要求回复的信息，消耗带宽，导致网络或系统停止正常服务，这属于什么攻击类型（）",
+      "optionA": "拒绝服务",
+      "optionB": "文件共享",
+      "optionC": "BIND漏洞",
+      "optionD": "远程过程调用",
+      "answer": "A"
+    },
+    {
+      "id": 141,
+      "question": "为了防御网络监听，最常用的方法是（）",
+      "optionA": "采用物理传输（非网络）",
+      "optionB": "信息加密",
+      "optionC": "无线网",
+      "optionD": "使用专线传输",
+      "answer": "B"
+    },
+    {
+      "id": 142,
+      "question": "以下关于“最小特权”安全管理原则理解正确的是（）",
+      "optionA": "组织机构内的敏感岗位不能由一个人长期负责",
+      "optionB": "对重要的工作进行分解，分自己给不同人员完成",
+      "optionC": "一个人有且仅有其执行岗位所足够的许可和权限",
+      "optionD": "防止员工由一个岗位变动到另一个岗位，累积越来越多的权限",
+      "answer": "C"
+    },
+    {
+      "id": 143,
+      "question": "我国的计算机年犯罪率的增长是（）",
+      "optionA": 0.1,
+      "optionB": 1.6,
+      "optionC": 0.6,
+      "optionD": 3,
+      "answer": "C"
+    },
+    {
+      "id": 144,
+      "question": "信息安全风险缺口是指（）",
+      "optionA": "IT的发展与安全投入，安全意识和安全手段的不平衡",
+      "optionB": "信息化中，信息不足产生的漏洞",
+      "optionC": "计算机网络运行，维护的漏洞",
+      "optionD": "计算中心的火灾隐患",
+      "answer": "A"
+    },
+    {
+      "id": 145,
+      "question": "下面威胁中不属于抵赖行为的是（）",
+      "optionA": "发信者事后否认曾经发送过某条消息",
+      "optionB": "收信者事后否认曾经接收过某条消息",
+      "optionC": "发信者事后否认曾经发送过某条消息的内容",
+      "optionD": "收信者接收消息后更改某部分内容",
+      "answer": "D"
+    },
+    {
+      "id": 146,
+      "question": "下面哪项不是IDS的主要功能（）",
+      "optionA": "监控和分析用户和系统活动",
+      "optionB": "统计分析异常活动模式",
+      "optionC": "对被破坏的数据进行修复",
+      "optionD": "识别活动模式以反映己知攻击",
+      "answer": "C"
+    },
+    {
+      "id": 147,
+      "question": "以下一项是数据完整性得到保护的例子（）",
+      "optionA": "某网站在访问量突然增加时对用户连接数量进行了限制，保证己登录的用户可以完成操作",
+      "optionB": "在提款过程中ATM终端发生故障，银行业务系统及时对该用户的帐户余顺进行了冲正操作",
+      "optionC": "某网管系统具有严格的审计功能，可以确定哪个管理员在何时对核心交换机进行了什么操作",
+      "optionD": "李先生在每天下班前将重要文件锁在档案室的保密柜中，使伪装成清沽工的商业间谍无法查看",
+      "answer": "B"
+    },
+    {
+      "id": 148,
+      "question": "计算机紧急应急小组的简称是（）",
+      "optionA": "CERT",
+      "optionB": "FIRST",
+      "optionC": "SANA",
+      "optionD": "不清楚",
+      "answer": "A"
+    },
+    {
+      "id": 149,
+      "question": "下面对访问控制技术描述最准确的是（）",
+      "optionA": "保证系统资源的可靠性",
+      "optionB": "实现系统资源的可追查性",
+      "optionC": "防止对系统资源的非授权访问",
+      "optionD": "保证系统资源的可信性",
+      "answer": "C"
+    },
+    {
+      "id": 150,
+      "question": "完整性机制可以防范以下哪种攻击（）",
+      "optionA": "假冒源地址或用户的地址的欺骗攻击",
+      "optionB": "抵赖做过信息的递交行为",
+      "optionC": "数据传输中被窃听获取",
+      "optionD": "数据传输中被篡改或破坏",
+      "answer": "D"
+    },
+    {
+      "id": 151,
+      "question": "通常一个三个字符的口令破解需要（）",
+      "optionA": "18毫秒",
+      "optionB": "18秒",
+      "optionC": "18分",
+      "optionD": "不清楚",
+      "answer": "B"
+    },
+    {
+      "id": 152,
+      "question": "计算机取证的合法原则是（）",
+      "optionA": "计算机取证的目的是获取证据，因此首先必须确保证据获取再履行相关法律手续",
+      "optionB": "计算机取证在任何时候都必须保证符合相关法律法规",
+      "optionC": "计算机取证只能由执法机构才能执行，以确保其合法性",
+      "optionD": "计算机取证必须获得执法机关的授权才可进行以确保合法性原则",
+      "answer": "B"
+    },
+    {
+      "id": 153,
+      "question": "以下对Windows账号的描述，正确的是（）",
+      "optionA": "Windows系统是采用SID（安全标识符）来标识用户对文件或文件夹的权限",
+      "optionB": "Windows系统是采用用户名来标识用户对文件或文件夹的权限",
+      "optionC": "Windows系统默认会生成administrator和guest两个账号，两个账号都不允许改名和删除",
+      "optionD": "Windows系统默认生成administrator和guest两个账号，两个账号都可以改名和删除",
+      "answer": "A"
+    },
+    {
+      "id": 154,
+      "question": "下列关于计算机病毒感染能力的说法不正确的是（）",
+      "optionA": "能将自身代码注入到引导区",
+      "optionB": "能将自身代码注入到扇区中的文件镜像",
+      "optionC": "能将自身代码注入文本文件中并执行",
+      "optionD": "能将自身代码注入到文档或模板的宏中代码",
+      "answer": "C"
+    },
+    {
+      "id": 155,
+      "question": "口令攻击的主要目的是（）",
+      "optionA": "获取口令破坏系统",
+      "optionB": "获取口令进入系统",
+      "optionC": "仅获取口令没有用途",
+      "optionD": "信息错误",
+      "answer": "B"
+    },
+    {
+      "id": 156,
+      "question": "通过口令使用习惯调查发现有大约___%的人使用的口令长度低于5个字符的（）",
+      "optionA": 50.5,
+      "optionB": 51.5,
+      "optionC": 52.5,
+      "optionD": 53.5,
+      "answer": "C"
+    },
+    {
+      "id": 157,
+      "question": "黑色星期四是指（）",
+      "optionA": "1998年11月3日星期四",
+      "optionB": "1999年6月24日星期四",
+      "optionC": "2000年4月13日星期四",
+      "optionD": "2001年星期四",
+      "answer": "A"
+    },
+    {
+      "id": 158,
+      "question": "以下人员中，谁负有决定信息分类级别的责任（）",
+      "optionA": "用户",
+      "optionB": "数据所有者",
+      "optionC": "审计员",
+      "optionD": "安全员",
+      "answer": "B"
+    },
+    {
+      "id": 159,
+      "question": "网络安全在多网合一时代的脆弱性体现在（）",
+      "optionA": "网络的脆弱性",
+      "optionB": "软件的脆弱性",
+      "optionC": "管理的脆弱性",
+      "optionD": "应用的脆弱性",
+      "answer": "C"
+    },
+    {
+      "id": 160,
+      "question": "网络攻击的种类（）",
+      "optionA": "物理攻击，语法攻击，语义攻击",
+      "optionB": "黑客攻击，病毒攻击",
+      "optionC": "硬件攻击，软件攻击",
+      "optionD": "物理攻击，黑客攻击，病毒攻击",
+      "answer": "A"
+    },
+    {
+      "id": 161,
+      "question": "对操作系统打补丁和系统升级是以下哪种风险控制措施（）",
+      "optionA": "降低风险",
+      "optionB": "规避风险",
+      "optionC": "转移风险",
+      "optionD": "接受风险",
+      "answer": "A"
+    },
+    {
+      "id": 162,
+      "question": "关于信息安全保障，下列说法正确的是（）",
+      "optionA": "信息安全保障是一个客观到主观的过程，即通过采取技术、管理、工程等手段，对信息资源的保密性、完整性、可用性提供保护，从而给信息系统所有者以信心",
+      "optionB": "信息安全保障的需求是由信息安全策略所决定的，是自上而下的一个过程，在这个过程中，决策者的能力和决心非常重要",
+      "optionC": "信息系统安全并不追求万无一失，而是要根据资金预算，做到量力而行",
+      "optionD": "以上说法都正确",
+      "answer": "D"
+    },
+    {
+      "id": 163,
+      "question": "WindowsNT提供的分布式安全环境又被称为（）",
+      "optionA": "域（Domain）",
+      "optionB": "工作组",
+      "optionC": "对等网",
+      "optionD": "安全网",
+      "answer": "A"
+    },
+    {
+      "id": 164,
+      "question": "下面哪一个情景属于身份验证（Authentication）过程（）",
+      "optionA": "用户依照系统提示输入用户名和口令",
+      "optionB": "用户在网络上共享了自己编写的一份Office文档，并设定哪些用户可以阅读，哪些用户可以修改",
+      "optionC": "用户使用加密软件对自己编写的Office文档进行加密，以阻止其他人得到这份拷贝后看到文档中的内容",
+      "optionD": "某个人尝试登录到你的计算机中，但是口令输入的不对，系统提示口令错误，并将这次失败的登录过程纪录在系统日志中",
+      "answer": "A"
+    },
+    {
+      "id": 165,
+      "question": "下面哪一个情景属于授权（Authorization）（）",
+      "optionA": "用户依照系统提示输入用户名和口令",
+      "optionB": "用户在网络上共享了自己编写的一份Office文档，并设定哪些用户可以阅读，哪些用户可以修改",
+      "optionC": "用户使用加密软件对自己编写的Office文档进行加密，以阻止其他人得到这份拷贝后看到文档中的内容",
+      "optionD": "某个人尝试登录到你的计算机中，但是口令输入的不对，系统提示口令错误，并将这次失败的登录过程纪录在系统日志中",
+      "answer": "B"
+    },
+    {
+      "id": 166,
+      "question": "应急方法学定义了安全事件处理的流程，这个流程的顺序是（）",
+      "optionA": "准备-遏制-检测-根除-恢复-跟进",
+      "optionB": "准备-检测-遏制-恢复-根除-跟进",
+      "optionC": "准备-检测-遏制-根除-恢复-跟进",
+      "optionD": "准备-遏制-根除-检测-恢复-跟进",
+      "answer": "C"
+    },
+    {
+      "id": 167,
+      "question": "下面对于“电子邮件炸弹”的解释最准确的是（）",
+      "optionA": "邮件正文中包含的恶意网站链接",
+      "optionB": "邮件附件中具有强破坏性的病毒",
+      "optionC": "社会工程的一种方式，具有恐吓内容的邮件",
+      "optionD": "在短时间内发送大量邮件的软件，可以造成目标邮箱爆满",
+      "answer": "D"
+    },
+    {
+      "id": 168,
+      "question": "语义攻击利用的是（）",
+      "optionA": "信息内容的含义",
+      "optionB": "病毒对软件攻击",
+      "optionC": "黑客对系统攻击",
+      "optionD": "黑客和病毒的攻击",
+      "answer": "A"
+    },
+    {
+      "id": 169,
+      "question": "“TCPSYNflooding”建立大量处于半连接状态的TCP连接，其攻击目标是网络的（）",
+      "optionA": "保密性",
+      "optionB": "完整性",
+      "optionC": "真实性",
+      "optionD": "可用性",
+      "answer": "D"
+    },
+    {
+      "id": 170,
+      "question": "网络攻击与防御处于不对称状态是因为（）",
+      "optionA": "管理的脆弱性",
+      "optionB": "应用的脆弱性",
+      "optionC": "网络软，硬件的复杂性",
+      "optionD": "软件的脆弱性",
+      "answer": "C"
+    },
+    {
+      "id": 171,
+      "question": "关于数据库注入攻击的说法错误的是（）",
+      "optionA": "它的主要原因是程序对用户的输入缺乏过滤",
+      "optionB": "一般情况下防火墙对它无法防范",
+      "optionC": "对它进行防范时要关注操作系统的版本和安全补丁",
+      "optionD": "注入成功后可以获取部分权限",
+      "answer": "C"
+    },
+    {
+      "id": 172,
+      "question": "1995年之后信息网络安全问题就是（）",
+      "optionA": "风险管理",
+      "optionB": "访问控制",
+      "optionC": "消除风险",
+      "optionD": "回避风险",
+      "answer": "A"
+    },
+    {
+      "id": 173,
+      "question": "信息网络安全的第二个时代（）",
+      "optionA": "专网时代",
+      "optionB": "九十年代中叶前",
+      "optionC": "世纪之交",
+      "optionD": "2003年",
+      "answer": "A"
+    },
+    {
+      "id": 174,
+      "question": "下列安全协议中，（）可用于安全电子邮件加密",
+      "optionA": "PGP",
+      "optionB": "SET",
+      "optionC": "SSL",
+      "optionD": "TLS",
+      "answer": "A"
+    },
+    {
+      "id": 175,
+      "question": "信息网络安全的第一个时代（）",
+      "optionA": "九十年代中叶",
+      "optionB": "九十年代中叶前",
+      "optionC": "世纪之交",
+      "optionD": "专网时代",
+      "answer": "B"
+    },
+    {
+      "id": 176,
+      "question": "信息网络安全的第三个时代（）",
+      "optionA": "主机时代,专网时代,多网合一时代",
+      "optionB": "主机时代,PC机时代,网络时代",
+      "optionC": "PC机时代,网络时代,信息时代",
+      "optionD": "2001年,2002年,2003年",
+      "answer": "A"
+    },
+    {
+      "id": 177,
+      "question": "在window系统中用于显示本机各网络端口详细情况的命令是（）",
+      "optionA": "netshow",
+      "optionB": "netstat",
+      "optionC": "ipconfig",
+      "optionD": "netview",
+      "answer": "B"
+    },
+    {
+      "id": 178,
+      "question": "下面哪个功能属于操作系统中的安全功能（）",
+      "optionA": "控制用户的作业排序和运行",
+      "optionB": "实现主机和外设的并行处理以及异常情况的处理",
+      "optionC": "保护系统程序和作业，禁止不合要求的对程序和数据的访问",
+      "optionD": "对计算机用户访问系统和资源的情况进行记录",
+      "answer": "C"
+    },
+    {
+      "id": 179,
+      "question": "下面哪个功能属于操作系统中的日志记录功能（）",
+      "optionA": "控制用户的作业排序和运行",
+      "optionB": "以合理的方式处理错误事件，而不至于影响其他程序的正常运行",
+      "optionC": "保护系统程序和作业，禁止不合要求的对程序和数据的访问",
+      "optionD": "对计算机用户访问系统和资源的情况进行记录",
+      "answer": "D"
+    },
+    {
+      "id": 180,
+      "question": "下列工具中可以对WEB表单进行暴力破解的是（）",
+      "optionA": "BurpSuite",
+      "optionB": "Nmap",
+      "optionC": "Sqlmap",
+      "optionD": "Appscan",
+      "answer": "A"
+    }
+  ],
+  "metadata": {
+    "exportedBy": "CISP-PTE练习题库",
+    "description": "题库配置文件 - 可直接导入使用",
+    "exportType": "manual"
+  }
+}
