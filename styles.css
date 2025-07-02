@@ -524,6 +524,12 @@ body {
     margin-bottom: 30px;
 }
 
+.wrong-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
 .wrong-question {
     background: #fff5f5;
     border-left: 4px solid #dc3545;

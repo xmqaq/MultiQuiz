@@ -857,24 +857,37 @@ function submitExam() {
     // 计算成绩
     let correctCount = 0;
     const newWrongQuestions = [];
+    const correctedQuestions = []; // 错题练习中答对的题目
     
     currentExam.questions.forEach(question => {
         const userAnswer = currentExam.answers[question.id];
         if (userAnswer === question.answer) {
             correctCount++;
+            // 如果是错题练习模式且答对了，记录为已纠正的错题
+            if (currentExam.isWrongQuestionsPractice) {
+                correctedQuestions.push(question.id);
+            }
         } else {
-            // 添加到错题本
-            const wrongQuestion = {
-                ...question,
-                userAnswer: userAnswer || '未作答',
-                timestamp: new Date().toISOString()
-            };
-            newWrongQuestions.push(wrongQuestion);
+            // 只有在非错题练习模式下才添加到错题本
+            if (!currentExam.isWrongQuestionsPractice) {
+                const wrongQuestion = {
+                    ...question,
+                    userAnswer: userAnswer || '未作答',
+                    timestamp: new Date().toISOString()
+                };
+                newWrongQuestions.push(wrongQuestion);
+            }
         }
     });
     
     // 更新错题本
-    wrongQuestions = [...wrongQuestions, ...newWrongQuestions];
+    if (currentExam.isWrongQuestionsPractice) {
+        // 错题练习模式：移除已纠正的错题
+        wrongQuestions = wrongQuestions.filter(q => !correctedQuestions.includes(q.id));
+    } else {
+        // 普通考试模式：添加新错题
+        wrongQuestions = [...wrongQuestions, ...newWrongQuestions];
+    }
     localStorage.setItem('wrongQuestions', JSON.stringify(wrongQuestions));
     
     // 更新统计信息
@@ -887,23 +900,51 @@ function submitExam() {
     const duration = Math.round((endTime - currentExam.startTime) / 1000 / 60);
     
     // 显示结果
-    const resultHtml = `
-        <div style="text-align: center; padding: 40px;">
-            <h2>🎉 考试完成！</h2>
-            <div style="margin: 30px 0;">
-                <div style="font-size: 3rem; color: ${score >= 60 ? '#28a745' : '#dc3545'}; font-weight: bold;">
-                    ${score}分
+    let resultHtml;
+    if (currentExam.isWrongQuestionsPractice) {
+        // 错题练习模式的结果显示
+        const remainingWrongCount = currentExam.questions.length - correctCount;
+        resultHtml = `
+            <div style="text-align: center; padding: 40px;">
+                <h2>📚 错题练习完成！</h2>
+                <div style="margin: 30px 0;">
+                    <div style="font-size: 2.5rem; color: ${score >= 80 ? '#28a745' : '#f39c12'}; font-weight: bold;">
+                        ${score}分
+                    </div>
+                    <div style="margin: 20px 0; font-size: 1.2rem;">
+                        练习题目：${currentExam.questions.length} 题<br>
+                        答对：${correctCount} 题<br>
+                        ${correctedQuestions.length > 0 ? `已掌握：${correctedQuestions.length} 题` : ''}<br>
+                        ${remainingWrongCount > 0 ? `仍需练习：${remainingWrongCount} 题` : '全部掌握！'}<br>
+                        用时：${duration} 分钟
+                    </div>
                 </div>
-                <div style="margin: 20px 0; font-size: 1.2rem;">
-                    正确：${correctCount} / ${currentExam.questions.length} 题<br>
-                    用时：${duration} 分钟<br>
-                    ${newWrongQuestions.length > 0 ? `错题：${newWrongQuestions.length} 题` : '全部正确！'}
-                </div>
+                <button class="btn btn-primary" onclick="startWrongQuestionsPractice()">继续练习错题</button>
+                <button class="btn btn-secondary" onclick="viewWrongQuestions()">查看错题本</button>
+                <button class="btn btn-info" onclick="restartExam()">返回考试设置</button>
             </div>
-            <button class="btn btn-primary" onclick="restartExam()">重新考试</button>
-            <button class="btn btn-secondary" onclick="viewWrongQuestions()">查看错题</button>
-        </div>
-    `;
+        `;
+    } else {
+        // 普通考试模式的结果显示
+        resultHtml = `
+            <div style="text-align: center; padding: 40px;">
+                <h2>🎉 考试完成！</h2>
+                <div style="margin: 30px 0;">
+                    <div style="font-size: 3rem; color: ${score >= 60 ? '#28a745' : '#dc3545'}; font-weight: bold;">
+                        ${score}分
+                    </div>
+                    <div style="margin: 20px 0; font-size: 1.2rem;">
+                        正确：${correctCount} / ${currentExam.questions.length} 题<br>
+                        用时：${duration} 分钟<br>
+                        ${newWrongQuestions.length > 0 ? `错题：${newWrongQuestions.length} 题` : '全部正确！'}
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="restartExam()">重新考试</button>
+                <button class="btn btn-secondary" onclick="viewWrongQuestions()">查看错题</button>
+                ${newWrongQuestions.length > 0 ? '<button class="btn btn-warning" onclick="startWrongQuestionsPractice()">练习错题</button>' : ''}
+            </div>
+        `;
+    }
     
     document.getElementById('questionContent').innerHTML = resultHtml;
     document.querySelector('.exam-controls').style.display = 'none';
@@ -1163,4 +1204,50 @@ function validateJsonData(data) {
     }
     
     return false;
+}
+
+// 错题练习功能
+function startWrongQuestionsPractice() {
+    if (wrongQuestions.length === 0) {
+        showMessage('错题本为空，无法开始练习', 'warning');
+        return;
+    }
+    
+    // 确认开始错题练习
+    if (!confirm(`确定要开始错题练习吗？\n共有 ${wrongQuestions.length} 道错题需要练习。`)) {
+        return;
+    }
+    
+    // 设置错题练习模式
+    currentExam = {
+        questions: shuffleArray(wrongQuestions),
+        currentIndex: 0,
+        answers: {},
+        startTime: Date.now(),
+        isWrongQuestionsPractice: true // 标记为错题练习模式
+    };
+    
+    // 切换到考试页面
+    document.querySelector('[data-tab="exam"]').click();
+    
+    // 显示考试界面
+    document.getElementById('examSetup').style.display = 'none';
+    document.getElementById('examContent').style.display = 'block';
+    
+    // 更新题目信息
+    document.getElementById('totalQuestions').textContent = currentExam.questions.length;
+    
+    // 错题练习模式不需要计时器，隐藏计时器
+    document.getElementById('timer').style.display = 'none';
+    
+    // 显示第一题
+    showQuestion();
+    
+    // 更新考试标题
+    const examTitle = document.querySelector('#examContent h2');
+    if (examTitle) {
+        examTitle.textContent = '错题练习模式';
+    }
+    
+    showMessage('错题练习已开始！', 'success');
 }

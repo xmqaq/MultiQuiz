@@ -122,7 +122,10 @@
         <div class="tab-content" id="wrong">
             <div class="wrong-header">
                 <h2>❌ 错题本</h2>
-                <button class="btn btn-danger" onclick="clearWrongQuestions()">清空错题本</button>
+                <div class="wrong-actions">
+                    <button class="btn btn-primary" onclick="startWrongQuestionsPractice()">🔄 错题练习</button>
+                    <button class="btn btn-danger" onclick="clearWrongQuestions()">清空错题本</button>
+                </div>
             </div>
             <div class="wrong-questions" id="wrongQuestions">
                 <div class="no-data">暂无错题记录</div>
