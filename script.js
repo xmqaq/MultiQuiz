@@ -10,6 +10,7 @@ let currentExam = {
 };
 let wrongQuestions = JSON.parse(localStorage.getItem('wrongQuestions') || '[]');
 let practiceStats = JSON.parse(localStorage.getItem('practiceStats') || '{ "total": 0, "correct": 0, "practiced": 0 }');
+let examHistory = JSON.parse(localStorage.getItem('examHistory') || '[]');
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -84,6 +85,11 @@ function initTabSwitching() {
             // 添加活动状态
             btn.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
+            
+            // 特定页面的初始化逻辑
+            if (targetTab === 'history') {
+                showExamHistory();
+            }
         });
     });
 }
@@ -899,6 +905,38 @@ function submitExam() {
     const endTime = new Date();
     const duration = Math.round((endTime - currentExam.startTime) / 1000 / 60);
     
+    // 保存考试历史记录（只保存正式考试，不保存错题练习）
+    if (!currentExam.isWrongQuestionsPractice) {
+        const examRecord = {
+            id: Date.now().toString(),
+            date: new Date().toISOString(),
+            score: score,
+            correctCount: correctCount,
+            totalQuestions: currentExam.questions.length,
+            duration: duration,
+            questions: currentExam.questions.map(q => ({
+                id: q.id,
+                question: q.question,
+                optionA: q.optionA,
+                optionB: q.optionB,
+                optionC: q.optionC,
+                optionD: q.optionD,
+                correctAnswer: q.answer,
+                userAnswer: currentExam.answers[q.id] || '未作答'
+            })),
+            wrongCount: newWrongQuestions.length
+        };
+        
+        examHistory.unshift(examRecord); // 添加到数组开头，最新的在前面
+        
+        // 限制历史记录数量，最多保存50条
+        if (examHistory.length > 50) {
+            examHistory = examHistory.slice(0, 50);
+        }
+        
+        localStorage.setItem('examHistory', JSON.stringify(examHistory));
+    }
+    
     // 显示结果
     let resultHtml;
     if (currentExam.isWrongQuestionsPractice) {
@@ -941,6 +979,7 @@ function submitExam() {
                 </div>
                 <button class="btn btn-primary" onclick="restartExam()">重新考试</button>
                 <button class="btn btn-secondary" onclick="viewWrongQuestions()">查看错题</button>
+                <button class="btn btn-info" onclick="switchToHistoryTab()">查看考试记录</button>
                 ${newWrongQuestions.length > 0 ? '<button class="btn btn-warning" onclick="startWrongQuestionsPractice()">练习错题</button>' : ''}
             </div>
         `;
@@ -1250,4 +1289,279 @@ function startWrongQuestionsPractice() {
     }
     
     showMessage('错题练习已开始！', 'success');
+}
+
+// ==================== 考试历史记录功能 ====================
+
+// 显示考试历史记录
+function showExamHistory() {
+    const historyList = document.getElementById('historyList');
+    
+    if (examHistory.length === 0) {
+        historyList.innerHTML = '<div class="no-data">暂无考试记录</div>';
+        return;
+    }
+    
+    const historyHtml = examHistory.map(record => {
+        const date = new Date(record.date);
+        const dateStr = date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const passStatus = record.score >= 60 ? '通过' : '未通过';
+        const passColor = record.score >= 60 ? '#28a745' : '#dc3545';
+        
+        return `
+            <div class="history-item">
+                <div class="history-item-header">
+                    <div class="history-item-title">模拟考试 #${record.id.slice(-6)}</div>
+                    <div class="history-item-date">${dateStr}</div>
+                </div>
+                <div class="history-item-stats">
+                    <div class="history-stat">
+                        <div class="history-stat-label">得分</div>
+                        <div class="history-stat-value" style="color: ${passColor}">${record.score}分</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">状态</div>
+                        <div class="history-stat-value" style="color: ${passColor}">${passStatus}</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">正确率</div>
+                        <div class="history-stat-value">${record.correctCount}/${record.totalQuestions}</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">用时</div>
+                        <div class="history-stat-value">${record.duration}分钟</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">错题数</div>
+                        <div class="history-stat-value">${record.wrongCount}题</div>
+                    </div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="btn btn-primary" onclick="viewExamDetail('${record.id}')">查看详情</button>
+                    <button class="btn btn-secondary" onclick="retakeExam('${record.id}')">重做此卷</button>
+                    <button class="btn btn-danger" onclick="deleteExamRecord('${record.id}')">删除记录</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    historyList.innerHTML = historyHtml;
+}
+
+// 查看考试详情
+function viewExamDetail(recordId) {
+    const record = examHistory.find(r => r.id === recordId);
+    if (!record) {
+        showMessage('找不到考试记录', 'error');
+        return;
+    }
+    
+    const date = new Date(record.date);
+    const dateStr = date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    const questionsHtml = record.questions.map((q, index) => {
+        const isCorrect = q.userAnswer === q.correctAnswer;
+        const isUnanswered = q.userAnswer === '未作答';
+        const statusClass = isUnanswered ? 'unanswered' : (isCorrect ? 'correct' : 'wrong');
+        const statusText = isUnanswered ? '未作答' : (isCorrect ? '正确' : '错误');
+        const statusColor = isUnanswered ? '#ffc107' : (isCorrect ? '#28a745' : '#dc3545');
+        
+        return `
+            <div class="history-question-item ${statusClass}">
+                <div class="history-question-content">
+                    ${index + 1}. ${q.question}
+                </div>
+                <div class="history-question-options">
+                    <div class="history-question-option ${q.correctAnswer === 'A' ? 'correct-answer' : ''} ${q.userAnswer === 'A' && q.userAnswer !== q.correctAnswer ? 'user-answer' : ''}">
+                        A. ${q.optionA}
+                    </div>
+                    <div class="history-question-option ${q.correctAnswer === 'B' ? 'correct-answer' : ''} ${q.userAnswer === 'B' && q.userAnswer !== q.correctAnswer ? 'user-answer' : ''}">
+                        B. ${q.optionB}
+                    </div>
+                    <div class="history-question-option ${q.correctAnswer === 'C' ? 'correct-answer' : ''} ${q.userAnswer === 'C' && q.userAnswer !== q.correctAnswer ? 'user-answer' : ''}">
+                        C. ${q.optionC}
+                    </div>
+                    <div class="history-question-option ${q.correctAnswer === 'D' ? 'correct-answer' : ''} ${q.userAnswer === 'D' && q.userAnswer !== q.correctAnswer ? 'user-answer' : ''}">
+                        D. ${q.optionD}
+                    </div>
+                </div>
+                <div class="history-question-result">
+                    <strong style="color: ${statusColor}">结果：${statusText}</strong><br>
+                    正确答案：${q.correctAnswer} | 你的答案：${q.userAnswer}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    const dialogHtml = `
+        <div class="history-detail-dialog" onclick="closeHistoryDetail(event)">
+            <div class="history-detail-content" onclick="event.stopPropagation()">
+                <div class="history-detail-header">
+                    <h3>考试详情 - ${dateStr}</h3>
+                    <button class="history-detail-close" onclick="closeHistoryDetail()">×</button>
+                </div>
+                <div class="history-item-stats" style="margin-bottom: 20px;">
+                    <div class="history-stat">
+                        <div class="history-stat-label">得分</div>
+                        <div class="history-stat-value">${record.score}分</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">正确率</div>
+                        <div class="history-stat-value">${record.correctCount}/${record.totalQuestions}</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">用时</div>
+                        <div class="history-stat-value">${record.duration}分钟</div>
+                    </div>
+                </div>
+                <div class="history-detail-questions">
+                    ${questionsHtml}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', dialogHtml);
+}
+
+// 关闭考试详情弹窗
+function closeHistoryDetail(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const dialog = document.querySelector('.history-detail-dialog');
+    if (dialog) {
+        dialog.remove();
+    }
+}
+
+// 重做考试
+function retakeExam(recordId) {
+    const record = examHistory.find(r => r.id === recordId);
+    if (!record) {
+        showMessage('找不到考试记录', 'error');
+        return;
+    }
+    
+    if (!confirm(`确定要重做这套试卷吗？\n题目数量：${record.totalQuestions}题`)) {
+        return;
+    }
+    
+    // 使用历史记录中的题目重新开始考试
+    const examQuestions = record.questions.map(q => ({
+        id: q.id,
+        question: q.question,
+        optionA: q.optionA,
+        optionB: q.optionB,
+        optionC: q.optionC,
+        optionD: q.optionD,
+        answer: q.correctAnswer
+    }));
+    
+    // 设置考试参数
+    currentExam = {
+        questions: examQuestions,
+        currentIndex: 0,
+        answers: {},
+        startTime: new Date(),
+        timeLimit: 60, // 默认60分钟
+        timer: null,
+        isWrongQuestionsPractice: false
+    };
+    
+    // 切换到考试页面
+    document.querySelector('[data-tab="exam"]').click();
+    
+    // 开始考试
+    setTimeout(() => {
+        startExam();
+    }, 100);
+    
+    showMessage('重做考试已开始！', 'success');
+}
+
+// 删除考试记录
+function deleteExamRecord(recordId) {
+    if (!confirm('确定要删除这条考试记录吗？此操作不可恢复。')) {
+        return;
+    }
+    
+    examHistory = examHistory.filter(r => r.id !== recordId);
+    localStorage.setItem('examHistory', JSON.stringify(examHistory));
+    
+    showExamHistory(); // 刷新显示
+    showMessage('考试记录已删除', 'success');
+}
+
+// 导出考试历史记录
+function exportHistory() {
+    if (examHistory.length === 0) {
+        showMessage('暂无考试记录可导出', 'warning');
+        return;
+    }
+    
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        totalRecords: examHistory.length,
+        records: examHistory
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `考试历史记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+    link.click();
+    
+    showMessage('考试记录导出成功', 'success');
+}
+
+// 清空考试历史记录
+function clearHistory() {
+    if (examHistory.length === 0) {
+        showMessage('暂无考试记录', 'info');
+        return;
+    }
+    
+    if (!confirm(`确定要清空所有考试记录吗？\n当前共有 ${examHistory.length} 条记录，此操作不可恢复。`)) {
+        return;
+    }
+    
+    examHistory = [];
+    localStorage.setItem('examHistory', JSON.stringify(examHistory));
+    
+    showExamHistory(); // 刷新显示
+    showMessage('考试记录已清空', 'success');
+}
+
+// 切换到历史记录页面
+function switchToHistoryTab() {
+    // 移除所有标签页的活动状态
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // 激活历史记录标签页
+    const historyBtn = document.querySelector('[data-tab="history"]');
+    const historyContent = document.getElementById('history');
+    
+    if (historyBtn && historyContent) {
+        historyBtn.classList.add('active');
+        historyContent.classList.add('active');
+        showExamHistory(); // 显示历史记录
+    }
 }

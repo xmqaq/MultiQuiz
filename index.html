@@ -19,6 +19,7 @@
             <button class="tab-btn" data-tab="practice">📚 总题库</button>
             <button class="tab-btn" data-tab="exam">✏️ 模拟答题</button>
             <button class="tab-btn" data-tab="wrong">❌ 错题本</button>
+            <button class="tab-btn" data-tab="history">📋 考试记录</button>
             <button class="tab-btn" data-tab="stats">📊 统计分析</button>
         </nav>
 
@@ -129,6 +130,20 @@
             </div>
             <div class="wrong-questions" id="wrongQuestions">
                 <div class="no-data">暂无错题记录</div>
+            </div>
+        </div>
+
+        <!-- 考试历史记录页面 -->
+        <div class="tab-content" id="history">
+            <div class="history-header">
+                <h2>📋 考试历史记录</h2>
+                <div class="history-controls">
+                    <button class="btn btn-secondary" onclick="exportHistory()">📤 导出记录</button>
+                    <button class="btn btn-danger" onclick="clearHistory()">🗑️ 清空记录</button>
+                </div>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="no-data">暂无考试记录</div>
             </div>
         </div>
 
