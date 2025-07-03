@@ -760,6 +760,9 @@ function startExam() {
     
     // 显示第一题
     showQuestion();
+    
+    // 显示考试控制按钮
+    document.querySelector('.exam-controls').style.display = 'flex';
 }
 
 // 开始计时器
@@ -1281,6 +1284,9 @@ function startWrongQuestionsPractice() {
     
     // 显示第一题
     showQuestion();
+    
+    // 显示考试控制按钮
+    document.querySelector('.exam-controls').style.display = 'flex';
     
     // 更新考试标题
     const examTitle = document.querySelector('#examContent h2');
