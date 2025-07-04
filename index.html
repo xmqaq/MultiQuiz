@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CISP-PTE 练习题库</title>
+    <title>网络安全考试练习平台</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🛡️ CISP-PTE 练习题库</h1>
-            <p>网络安全练习平台 Author:xmqaq</p>
+            <h1>🛡️ 网络安全考试练习平台</h1>
         </header>
 
         <nav class="nav-tabs">
@@ -80,41 +79,75 @@
         <!-- 模拟答题页面 -->
         <div class="tab-content" id="exam">
             <div class="exam-setup" id="examSetup">
-                <h2>✏️ 模拟考试设置</h2>
+                <div class="exam-setup-header">
+                    <h2>模拟考试设置</h2>
+                    <p class="exam-setup-subtitle">选择考试参数，开始你的练习之旅</p>
+                </div>
                 <div class="setup-options">
-                    <div class="option-group">
-                        <label>题目数量：</label>
-                        <select id="examCount">
-                            <option value="20">20题</option>
-                            <option value="50">50题</option>
-                            <option value="100">100题</option>
-                            <option value="all">全部题目</option>
+                    <div class="option-card">
+                        <div class="option-icon">📝</div>
+                        <label>题目数量</label>
+                        <select id="examCount" class="modern-select">
+                            <option value="20">20题 (快速练习)</option>
+                            <option value="50">50题 (标准练习)</option>
+                            <option value="100">100题 (全面练习)</option>
+                            <option value="all">全部题目 (完整题库)</option>
                         </select>
                     </div>
-                    <div class="option-group">
-                        <label>考试时间：</label>
-                        <select id="examTime">
+                    <div class="option-card">
+                        <div class="option-icon">⏰</div>
+                        <label>考试时间</label>
+                        <select id="examTime" class="modern-select">
                             <option value="30">30分钟</option>
                             <option value="60">60分钟</option>
                             <option value="90">90分钟</option>
                             <option value="120">120分钟</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="startExam()">开始考试</button>
                 </div>
+                
+                <button class="btn btn-start-exam" onclick="startExam()">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">开始考试</span>
+                </button>
             </div>
+            
             <div class="exam-content" id="examContent" style="display: none;">
                 <div class="exam-header">
-                    <div class="exam-info">
-                        <span id="currentQuestion">1</span> / <span id="totalQuestions">20</span>
+                    <div class="exam-progress">
+                        <div class="progress-info">
+                            <span class="progress-label">进度</span>
+                            <span class="progress-numbers">
+                                <span id="currentQuestion">1</span> / <span id="totalQuestions">20</span>
+                            </span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
                     </div>
-                    <div class="timer" id="timer">60:00</div>
+                    <div class="timer-container">
+                        <div class="timer-icon">⏱️</div>
+                        <div class="timer" id="timer">60:00</div>
+                    </div>
                 </div>
-                <div class="question-content" id="questionContent"></div>
+                
+                <div class="question-container">
+                    <div class="question-content" id="questionContent"></div>
+                </div>
+                
                 <div class="exam-controls">
-                    <button class="btn btn-secondary" onclick="prevQuestion()">上一题</button>
-                    <button class="btn btn-secondary" onclick="nextQuestion()">下一题</button>
-                    <button class="btn btn-danger" onclick="submitExam()">提交答卷</button>
+                    <button class="btn btn-nav btn-prev" onclick="prevQuestion()">
+                        <span class="btn-icon">←</span>
+                        <span class="btn-text">上一题</span>
+                    </button>
+                    <button class="btn btn-nav btn-next" onclick="nextQuestion()">
+                        <span class="btn-text">下一题</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                    <button class="btn btn-submit" onclick="submitExam()">
+                        <span class="btn-icon">✓</span>
+                        <span class="btn-text">提交答卷</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -150,7 +183,7 @@
         <!-- 统计分析页面 -->
         <div class="tab-content" id="stats">
             <div class="stats-header">
-                <h2>📊 学习统计</h2>
+                <h2>学习统计</h2>
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
@@ -168,6 +201,24 @@
                 <div class="stat-card">
                     <h3>错题数</h3>
                     <div class="stat-value" id="wrongCount">0</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>📈 学习练习趋势</h3>
+                    <div class="chart-controls">
+                        <button class="btn btn-small" onclick="changeChartPeriod('7')" id="period7">近7天</button>
+                        <button class="btn btn-small active" onclick="changeChartPeriod('30')" id="period30">近30天</button>
+                        <button class="btn btn-small" onclick="changeChartPeriod('all')" id="periodAll">全部</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="practiceChart" width="800" height="200"></canvas>
+                    <div class="chart-no-data" id="chartNoData" style="display: none;">
+                        <div class="no-data-icon">📊</div>
+                        <div class="no-data-text">暂无练习数据</div>
+                        <div class="no-data-hint">完成一些练习后，这里将显示你的学习趋势</div>
+                    </div>
                 </div>
             </div>
         </div>

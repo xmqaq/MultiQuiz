@@ -736,7 +736,19 @@ function startExam() {
     // 准备考试题目
     let examQuestions = [...questions];
     if (examCount !== 'all') {
-        examQuestions = shuffleArray(examQuestions).slice(0, parseInt(examCount));
+        const requestedCount = parseInt(examCount);
+        
+        // 检查题库数量是否足够
+        if (requestedCount > questions.length) {
+            showMessage(`题库只有 ${questions.length} 道题，无法生成 ${requestedCount} 道不重复的题目。请选择较少的题目数量或导入更多题目。`, 'error');
+            return;
+        }
+        
+        // 随机打乱并取指定数量的题目，确保不重复
+        examQuestions = shuffleArray(examQuestions).slice(0, requestedCount);
+    } else {
+        // 全部题目也要随机打乱顺序
+        examQuestions = shuffleArray(examQuestions);
     }
     
     currentExam = {
@@ -797,6 +809,7 @@ function showQuestion() {
     const questionContent = document.getElementById('questionContent');
     
     document.getElementById('currentQuestion').textContent = currentExam.currentIndex + 1;
+    document.getElementById('totalQuestions').textContent = currentExam.questions.length;
     
     const html = `
         <div class="exam-question">
@@ -824,6 +837,9 @@ function showQuestion() {
     
     questionContent.innerHTML = html;
     
+    // 更新进度条
+    updateProgressBar();
+    
     // 添加选项点击事件
     const options = questionContent.querySelectorAll('.exam-option');
     options.forEach(option => {
@@ -839,6 +855,15 @@ function showQuestion() {
             currentExam.answers[question.id] = radio.value;
         });
     });
+}
+
+// 更新进度条
+function updateProgressBar() {
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill && currentExam.questions.length > 0) {
+        const progress = ((currentExam.currentIndex + 1) / currentExam.questions.length) * 100;
+        progressFill.style.width = progress + '%';
+    }
 }
 
 // 上一题
@@ -1060,6 +1085,20 @@ function updateStats() {
         ? Math.round((practiceStats.correct / practiceStats.practiced) * 100)
         : 0;
     document.getElementById('accuracyRate').textContent = accuracy + '%';
+    
+    // 更新模拟考试页面的题库数量显示
+    const currentLibraryCount = document.getElementById('currentLibraryCount');
+    if (currentLibraryCount) {
+        currentLibraryCount.textContent = questions.length;
+    }
+    
+    // 如果当前在统计页面，更新图表
+    const statsTab = document.getElementById('stats');
+    if (statsTab && statsTab.classList.contains('active')) {
+        setTimeout(() => {
+            drawPracticeChart(currentChartPeriod);
+        }, 100);
+    }
 }
 
 // 工具函数：数组随机排序
@@ -1571,3 +1610,261 @@ function switchToHistoryTab() {
         showExamHistory(); // 显示历史记录
     }
 }
+
+// 图表相关功能
+let currentChartPeriod = '30';
+let practiceChart = null;
+
+// 获取练习数据统计
+function getPracticeData(period) {
+    const now = new Date();
+    const data = {};
+    
+    // 从考试历史记录中提取练习数据
+    examHistory.forEach(record => {
+        const recordDate = new Date(record.date);
+        const daysDiff = Math.floor((now - recordDate) / (1000 * 60 * 60 * 24));
+        
+        // 根据期间过滤数据
+        if (period === '7' && daysDiff > 7) return;
+        if (period === '30' && daysDiff > 30) return;
+        
+        const dateKey = recordDate.toLocaleDateString('zh-CN');
+        if (!data[dateKey]) {
+            data[dateKey] = {
+                date: dateKey,
+                questions: 0,
+                correct: 0,
+                exams: 0
+            };
+        }
+        
+        data[dateKey].questions += record.totalQuestions;
+        data[dateKey].correct += record.correctCount;
+        data[dateKey].exams += 1;
+    });
+    
+    // 生成日期范围
+    const days = period === '7' ? 7 : (period === '30' ? 30 : Math.max(30, Object.keys(data).length));
+    const result = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toLocaleDateString('zh-CN');
+        
+        result.push({
+            date: dateKey,
+            shortDate: `${date.getMonth() + 1}/${date.getDate()}`,
+            questions: data[dateKey] ? data[dateKey].questions : 0,
+            correct: data[dateKey] ? data[dateKey].correct : 0,
+            exams: data[dateKey] ? data[dateKey].exams : 0
+        });
+    }
+    
+    return result;
+}
+
+// 绘制练习趋势图表
+function drawPracticeChart(period = '30') {
+    const canvas = document.getElementById('practiceChart');
+    const noDataDiv = document.getElementById('chartNoData');
+    
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const data = getPracticeData(period);
+    
+    // 检查是否有数据
+    const hasData = data.some(d => d.questions > 0);
+    if (!hasData) {
+        canvas.style.display = 'none';
+        noDataDiv.style.display = 'block';
+        return;
+    }
+    
+    canvas.style.display = 'block';
+    noDataDiv.style.display = 'none';
+    
+    // 设置画布尺寸
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    const width = rect.width;
+    const height = rect.height;
+    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+    
+    // 清空画布
+    ctx.clearRect(0, 0, width, height);
+    
+    // 计算最大值
+    const maxQuestions = Math.max(...data.map(d => d.questions), 10);
+    const maxCorrect = Math.max(...data.map(d => d.correct), 5);
+    
+    // 绘制背景网格
+    ctx.strokeStyle = '#e9ecef';
+    ctx.lineWidth = 1;
+    
+    // 水平网格线
+    for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(padding.left + chartWidth, y);
+        ctx.stroke();
+    }
+    
+    // 垂直网格线
+    const stepX = chartWidth / (data.length - 1 || 1);
+    for (let i = 0; i < data.length; i++) {
+        const x = padding.left + stepX * i;
+        ctx.beginPath();
+        ctx.moveTo(x, padding.top);
+        ctx.lineTo(x, padding.top + chartHeight);
+        ctx.stroke();
+    }
+    
+    // 绘制练习题目数量曲线
+    if (data.length > 1) {
+        ctx.strokeStyle = '#007bff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        
+        data.forEach((point, index) => {
+            const x = padding.left + stepX * index;
+            const y = padding.top + chartHeight - (point.questions / maxQuestions) * chartHeight;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+        
+        // 绘制数据点
+        ctx.fillStyle = '#007bff';
+        data.forEach((point, index) => {
+            const x = padding.left + stepX * index;
+            const y = padding.top + chartHeight - (point.questions / maxQuestions) * chartHeight;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+    
+    // 绘制正确题目数量曲线
+    if (data.length > 1) {
+        ctx.strokeStyle = '#28a745';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        
+        data.forEach((point, index) => {
+            const x = padding.left + stepX * index;
+            const y = padding.top + chartHeight - (point.correct / maxQuestions) * chartHeight;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 绘制正确数据点
+        ctx.fillStyle = '#28a745';
+        data.forEach((point, index) => {
+            const x = padding.left + stepX * index;
+            const y = padding.top + chartHeight - (point.correct / maxQuestions) * chartHeight;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+    
+    // 绘制Y轴标签
+    ctx.fillStyle = '#6c757d';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    
+    for (let i = 0; i <= 5; i++) {
+        const value = Math.round((maxQuestions / 5) * (5 - i));
+        const y = padding.top + (chartHeight / 5) * i;
+        ctx.fillText(value.toString(), padding.left - 10, y);
+    }
+    
+    // 绘制X轴标签
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    
+    data.forEach((point, index) => {
+        if (index % Math.ceil(data.length / 8) === 0 || index === data.length - 1) {
+            const x = padding.left + stepX * index;
+            const y = padding.top + chartHeight + 10;
+            ctx.fillText(point.shortDate, x, y);
+        }
+    });
+    
+    // 绘制图例
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    // 练习题目图例
+    ctx.fillStyle = '#007bff';
+    ctx.fillRect(padding.left, 5, 15, 3);
+    ctx.fillStyle = '#495057';
+    ctx.fillText('练习题目', padding.left + 20, 7);
+    
+    // 正确题目图例
+    ctx.fillStyle = '#28a745';
+    ctx.fillRect(padding.left + 100, 5, 15, 3);
+    ctx.fillStyle = '#495057';
+    ctx.fillText('正确题目', padding.left + 120, 7);
+}
+
+// 切换图表时间段
+function changeChartPeriod(period) {
+    currentChartPeriod = period;
+    
+    // 更新按钮状态
+    document.querySelectorAll('.btn-small').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`period${period}`).classList.add('active');
+    
+    // 重新绘制图表
+    drawPracticeChart(period);
+}
+
+// 监听统计页面切换
+document.addEventListener('DOMContentLoaded', function() {
+    const statsTabBtn = document.querySelector('[data-tab="stats"]');
+    if (statsTabBtn) {
+        statsTabBtn.addEventListener('click', function() {
+            setTimeout(() => {
+                drawPracticeChart(currentChartPeriod);
+            }, 100);
+        });
+    }
+});
+
+// 监听窗口大小变化，重新绘制图表
+window.addEventListener('resize', function() {
+    const statsTab = document.getElementById('stats');
+    if (statsTab && statsTab.classList.contains('active')) {
+        setTimeout(() => {
+            drawPracticeChart(currentChartPeriod);
+        }, 100);
+    }
+});
