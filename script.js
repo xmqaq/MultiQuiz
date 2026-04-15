@@ -582,23 +582,16 @@ function renderSubjectCards() {
     subjects.forEach(subject => {
         const wrongCount = wrongQuestions.filter(q => q.subjectId === subject.id).length;
         const total = subject.questions.length;
-        // 掌握率：已打"已掌握"标签的题目数
-        const masteredCount = total > 0
-            ? subject.questions.filter(q => questionTags[q.id]?.includes('已掌握')).length
-            : 0;
-        const masteredPct = total > 0 ? Math.round(masteredCount / total * 100) : 0;
+        const favoriteCount = subject.questions.filter(q => favoriteSet.has(questionIdKey(q.id))).length;
         const card = document.createElement('div');
         card.className = 'subject-card';
         card.innerHTML = `
-            <div class="subject-card-header">
-                <div class="subject-icon">${getSubjectIcon(subject.name)}</div>
+            <div class="subject-card-top">
+                <div class="subject-card-name">${escapeHtml(subject.name)}</div>
                 <div class="subject-card-actions">
-                    <button class="icon-btn" title="编辑名称" onclick="renameSubject('${subject.id}')">✏️</button>
-                    <button class="icon-btn" title="导出" onclick="exportSubject('${subject.id}')">📤</button>
-                    <button class="icon-btn danger" title="删除" onclick="deleteSubject('${subject.id}')">🗑️</button>
+                    <button class="icon-btn subject-action-btn" title="管理题库" onclick="showSubjectCardActions('${subject.id}')">管理</button>
                 </div>
             </div>
-            <div class="subject-card-name">${subject.name}</div>
             <div class="subject-card-stats">
                 <div class="sc-stat">
                     <div class="sc-stat-num">${total}</div>
@@ -609,8 +602,8 @@ function renderSubjectCards() {
                     <div class="sc-stat-label">错题</div>
                 </div>
                 <div class="sc-stat">
-                    <div class="sc-stat-num sc-stat-num--mastered">${masteredPct}%</div>
-                    <div class="sc-stat-label">掌握</div>
+                    <div class="sc-stat-num sc-stat-num--favorite">${favoriteCount}</div>
+                    <div class="sc-stat-label">收藏</div>
                 </div>
             </div>
             <div class="subject-card-btns">
@@ -620,14 +613,6 @@ function renderSubjectCards() {
         `;
         container.insertBefore(card, empty);
     });
-}
-
-function getSubjectIcon(name) {
-    const icons = { '网络安全': '🔒', '近代史': '🏛️', '马克思': '📜', '英语': '🔤', '数学': '📐', '物理': '⚛️', '化学': '🧪', '生物': '🧬', '语文': '✍️', '历史': '🏯', '地理': '🌍', '政治': '🏛️' };
-    for (const [key, icon] of Object.entries(icons)) {
-        if (name.includes(key)) return icon;
-    }
-    return '📖';
 }
 
 function quickExam(subjectId) {
@@ -659,6 +644,26 @@ function showSubjectActions() {
                 <button class="btn btn-secondary" onclick="closeModal(); document.getElementById('restoreFileInput').click()">📥 导入配置</button>
                 <button class="btn btn-secondary" onclick="closeModal(); exportAllBackup()">📤 导出配置</button>
                 <button class="btn btn-outline" onclick="closeModal(); deduplicateLibrary()">🧹 题库去重</button>
+            </div>
+        </div>
+    `);
+}
+
+function showSubjectCardActions(subjectId) {
+    const subject = subjects.find(s => s.id === subjectId);
+    if (!subject) return;
+
+    showModal(`
+        <div class="modal-header">
+            <h3 class="modal-title">${escapeHtml(subject.name)}</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p class="browse-actions-note">这里保留当前题库的管理操作，避免卡片顶部出现过多按钮。</p>
+            <div class="modal-actions modal-actions-col">
+                <button class="btn btn-secondary" onclick="closeModal(); renameSubject('${subject.id}')">编辑题库名</button>
+                <button class="btn btn-secondary" onclick="closeModal(); exportSubject('${subject.id}')">导出当前题库</button>
+                <button class="btn btn-danger" onclick="closeModal(); deleteSubject('${subject.id}')">删除当前题库</button>
             </div>
         </div>
     `);
@@ -1018,17 +1023,23 @@ function toggleBrowseAnswerReveal(questionId) {
 }
 
 function showBrowseActions() {
+    const { subject, questionCount } = getBrowseScopeInfo();
+    const scopeTitle = subject ? `当前题库：${escapeHtml(subject.name)}` : '当前范围：全部题库';
+    const clearLabel = subject ? `清空当前题库（${escapeHtml(subject.name)}）` : '清空全部题库';
+
     showModal(`
         <div class="modal-header">
             <h3 class="modal-title">浏览页操作</h3>
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
         <div class="modal-body">
-            <p style="margin-bottom:16px;color:var(--text-secondary)">把低频操作集中起来，浏览页首屏会更聚焦题目本身。</p>
+            <p class="browse-actions-note">${scopeTitle}，共 ${questionCount} 道题。这里保留低频操作，首屏更聚焦题目本身。</p>
             <div class="modal-actions modal-actions-col">
-                <button class="btn btn-secondary" onclick="closeModal(); showLibraryInfo()">📊 题库信息</button>
-                <button class="btn btn-secondary" onclick="closeModal(); showExportOptions()">📤 导出当前范围</button>
-                <button class="btn btn-danger" onclick="closeModal(); clearLibrary()">🗑️ 清空当前范围</button>
+                <button class="btn btn-secondary" onclick="closeModal(); showLibraryInfo()">查看题库信息</button>
+                <button class="btn btn-secondary" onclick="exportAsJSON()">导出当前题目为 JSON</button>
+                <button class="btn btn-secondary" onclick="exportAsPDF()">导出当前题目为 PDF</button>
+                <button class="btn btn-secondary" onclick="exportAsText()">导出当前题目为文本</button>
+                <button class="btn btn-danger" onclick="closeModal(); clearLibrary()">${clearLabel}</button>
             </div>
         </div>
     `);
@@ -1084,35 +1095,46 @@ function displayBrowseQuestions(questionsToShow) {
     container.innerHTML = pool.map((q, i) => renderQuestionItem(q, i)).join('');
 }
 
+function renderQuestionTagsHtml(questionId) {
+    const tags = questionTags[questionId] || [];
+    if (tags.length === 0) return '';
+    return `<div class="q-tags q-tags-inline">${tags.map(t => `<span class="q-tag tag-${t}">${escapeHtml(t)}</span>`).join('')}</div>`;
+}
+
 function renderQuestionItem(q, i) {
-    const tags = questionTags[q.id] || [];
     const favored = isFavorited(q.id);
     const hideAnswer = browseAnswerMode === 'hide';
     const answerVisible = !hideAnswer || revealedBrowseAnswers.has(questionIdKey(q.id));
     return `
         <div class="q-item" data-id="${q.id}">
             <div class="q-item-header">
-                <span class="q-num">${i + 1}</span>
-                <span class="q-subject-tag">${escapeHtml(q._subjectName || '')}</span>
+                <div class="q-item-meta">
+                    <span class="q-num">${i + 1}</span>
+                    <span class="q-subject-tag">${escapeHtml(q._subjectName || '')}</span>
+                    ${renderQuestionTagsHtml(q.id)}
+                </div>
                 <div class="q-item-actions">
                     <button class="icon-btn fav-btn ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favored ? '★' : '☆'}</button>
-                    <button class="icon-btn" onclick='showTagEditor(${JSON.stringify(q.id)})' title="编辑标签">🏷️</button>
+                    <button class="icon-btn" onclick='showTagEditor(${JSON.stringify(q.id)})' title="编辑标签">标签</button>
                 </div>
             </div>
-            <div class="q-text">${escapeHtml(q.question)}</div>
+            <div class="q-text-wrap">
+                <div class="q-text">${escapeHtml(q.question)}</div>
+            </div>
             <div class="q-options">
-                <div class="q-opt">A. ${escapeHtml(q.optionA)}</div>
-                <div class="q-opt">B. ${escapeHtml(q.optionB)}</div>
-                <div class="q-opt">C. ${escapeHtml(q.optionC)}</div>
-                <div class="q-opt">D. ${escapeHtml(q.optionD)}</div>
+                ${['A', 'B', 'C', 'D'].map(opt => `
+                    <div class="q-opt">
+                        <span class="q-opt-letter">${opt}</span>
+                        <span class="q-opt-body">${escapeHtml(q['option' + opt])}</span>
+                    </div>
+                `).join('')}
             </div>
             <div class="q-answer ${answerVisible ? '' : 'collapsed'}">
                 ${answerVisible
-                    ? `正确答案：<strong>${q.answer}</strong>${hideAnswer ? `<button class="btn btn-sm btn-ghost q-answer-toggle" onclick='toggleBrowseAnswerReveal(${JSON.stringify(q.id)})'>收起答案</button>` : ''}`
+                    ? `<span class="q-answer-main"><span class="q-answer-label">正确答案</span><span class="q-answer-pill">${q.answer}</span></span>${hideAnswer ? `<button class="btn btn-sm btn-ghost q-answer-toggle" onclick='toggleBrowseAnswerReveal(${JSON.stringify(q.id)})'>收起答案</button>` : ''}`
                     : `<button class="btn btn-sm btn-secondary q-answer-toggle" onclick='toggleBrowseAnswerReveal(${JSON.stringify(q.id)})'>显示答案</button>`
                 }
             </div>
-            ${tags.length > 0 ? `<div class="q-tags">${tags.map(t => `<span class="q-tag tag-${t}">${t}</span>`).join('')}</div>` : ''}
         </div>
     `;
 }
@@ -1227,17 +1249,17 @@ function toggleQuestionTag(questionId, tag, evt) {
     // 只更新这一道题目的标签显示，不重渲染整个列表
     const qItem = document.querySelector(`.q-item[data-id="${CSS.escape(questionId)}"]`);
     if (qItem) {
-        const tags = questionTags[questionId] || [];
-        const tagsDiv = qItem.querySelector('.q-tags');
-        if (tags.length > 0) {
-            const html = `<div class="q-tags">${tags.map(t => `<span class="q-tag tag-${t}">${t}</span>`).join('')}</div>`;
+        const tagsDiv = qItem.querySelector('.q-item-meta .q-tags');
+        const meta = qItem.querySelector('.q-item-meta');
+        const html = renderQuestionTagsHtml(questionId);
+        if (html) {
             if (tagsDiv) {
                 tagsDiv.outerHTML = html;
-            } else {
-                qItem.insertAdjacentHTML('beforeend', html);
+            } else if (meta) {
+                meta.insertAdjacentHTML('beforeend', html);
             }
-        } else {
-            if (tagsDiv) tagsDiv.remove();
+        } else if (tagsDiv) {
+            tagsDiv.remove();
         }
     }
 
@@ -1299,7 +1321,7 @@ function showLibraryInfo() {
     const total = subjects.reduce((n, s) => n + s.questions.length, 0);
     const rows = subjects.map(s => `<tr><td>${s.name}</td><td>${s.questions.length}</td></tr>`).join('');
     showModal(`
-        <h3 class="modal-title">📊 题库信息</h3>
+        <h3 class="modal-title">题库信息</h3>
         <table class="info-table">
             <thead><tr><th>学科</th><th>题目数</th></tr></thead>
             <tbody>${rows}</tbody>
@@ -1321,15 +1343,22 @@ function exportQuestions() {
     }
 }
 
+function getBrowseScopeInfo() {
+    const subjectFilter = document.getElementById('browseSubjectFilter')?.value || 'all';
+    const subject = subjectFilter === 'all' ? null : subjects.find(s => s.id === subjectFilter) || null;
+    const questionCount = subject
+        ? subject.questions.length
+        : subjects.reduce((n, s) => n + s.questions.length, 0);
+    return { subjectFilter, subject, questionCount };
+}
+
 // 导出选项
 function showExportOptions() {
-    const subjectFilter = document.getElementById('browseSubjectFilter')?.value || 'all';
-    const subject = subjectFilter === 'all' ? null : subjects.find(s => s.id === subjectFilter);
-    const questionCount = subject ? subject.questions.length : subjects.reduce((n, s) => n + s.questions.length, 0);
+    const { subject, questionCount } = getBrowseScopeInfo();
 
     showModal(`
         <div class="modal-header">
-            <h3 class="modal-title">📤 导出题库</h3>
+            <h3 class="modal-title">导出题库</h3>
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
         <div class="modal-body">

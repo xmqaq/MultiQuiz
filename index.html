@@ -12,10 +12,10 @@
         <!-- 侧边栏 -->
         <aside class="sidebar" role="navigation" aria-label="主导航">
             <div class="sidebar-brand">
-                <div class="brand-icon" aria-hidden="true">📖</div>
+                <div class="brand-icon" aria-hidden="true">MQ</div>
                 <div class="brand-text">
-                    <div class="brand-name">题库练习</div>
-                    <div class="brand-sub">选择题练习平台</div>
+                    <div class="brand-name">MultiQuiz</div>
+                    <div class="brand-sub">题库练习平台</div>
                 </div>
                 <button class="sidebar-toggle" id="sidebarToggle" type="button" onclick="toggleSidebar()" aria-label="收起侧边栏" title="收起侧边栏">
                     <span class="sidebar-toggle-icon" aria-hidden="true">«</span>
@@ -23,31 +23,31 @@
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-item active" data-tab="subjects" role="tab" aria-selected="true" aria-controls="page-subjects">
-                    <span class="nav-icon" aria-hidden="true">🏠</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">题库中心</span>
                 </button>
                 <button class="nav-item" data-tab="import" role="tab" aria-selected="false" aria-controls="page-import">
-                    <span class="nav-icon" aria-hidden="true">📁</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">导入题库</span>
                 </button>
                 <button class="nav-item" data-tab="browse" role="tab" aria-selected="false" aria-controls="page-browse">
-                    <span class="nav-icon" aria-hidden="true">📚</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">题目浏览</span>
                 </button>
                 <button class="nav-item" data-tab="exam" role="tab" aria-selected="false" aria-controls="page-exam">
-                    <span class="nav-icon" aria-hidden="true">✏️</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">模拟答题</span>
                 </button>
                 <button class="nav-item" data-tab="wrong" role="tab" aria-selected="false" aria-controls="page-wrong">
-                    <span class="nav-icon" aria-hidden="true">❌</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">错题本</span>
                 </button>
                 <button class="nav-item" data-tab="history" role="tab" aria-selected="false" aria-controls="page-history">
-                    <span class="nav-icon" aria-hidden="true">📋</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">考试记录</span>
                 </button>
                 <button class="nav-item" data-tab="stats" role="tab" aria-selected="false" aria-controls="page-stats">
-                    <span class="nav-icon" aria-hidden="true">📊</span>
+                    <span class="nav-icon" aria-hidden="true"></span>
                     <span class="nav-label">统计分析</span>
                 </button>
             </nav>
@@ -98,21 +98,18 @@
 
                 <div class="mobile-quick-actions" aria-label="手机端快捷入口">
                     <button class="mobile-quick-action" type="button" onclick="switchTab('import')">
-                        <span class="mobile-quick-icon" aria-hidden="true">📁</span>
                         <span class="mobile-quick-text">
                             <span class="mobile-quick-title">导入题库</span>
                             <span class="mobile-quick-desc">添加新学科题库</span>
                         </span>
                     </button>
                     <button class="mobile-quick-action" type="button" onclick="document.getElementById('restoreFileInput').click()">
-                        <span class="mobile-quick-icon" aria-hidden="true">📥</span>
                         <span class="mobile-quick-text">
                             <span class="mobile-quick-title">恢复配置</span>
                             <span class="mobile-quick-desc">从备份文件恢复</span>
                         </span>
                     </button>
                     <button class="mobile-quick-action" type="button" onclick="switchTab('history')">
-                        <span class="mobile-quick-icon" aria-hidden="true">📋</span>
                         <span class="mobile-quick-text">
                             <span class="mobile-quick-title">考试记录</span>
                             <span class="mobile-quick-desc">查看历次练习成绩</span>
@@ -262,7 +259,6 @@
                             <label class="browse-label" for="searchInput">关键词</label>
                             <div class="browse-search-row browse-search-row-simple">
                                 <div class="search-wrap">
-                                    <span class="search-icon">🔍</span>
                                     <input type="text" id="searchInput" class="search-input" placeholder="输入关键词后自动筛选题目...">
                                 </div>
                             </div>
@@ -291,28 +287,43 @@
                         </div>
                     </div>
                     <div class="exam-setup-grid">
-                        <div class="setup-card">
-                            <div class="setup-card-icon" aria-hidden="true">📚</div>
-                            <label class="setup-label" for="examSubject">选择学科</label>
-                            <select id="examSubject" class="select-control" onchange="onExamSubjectChange()" aria-describedby="examSubjectHint">
+                        <div class="setup-card setup-card-subject">
+                            <div class="setup-card-head">
+                                <span class="setup-card-mark" aria-hidden="true"></span>
+                                <div>
+                                    <div class="setup-card-title">选择学科</div>
+                                    <div class="setup-card-note">先确定本次练习范围</div>
+                                </div>
+                            </div>
+                            <select id="examSubject" class="select-control" onchange="onExamSubjectChange()" aria-label="选择学科" aria-describedby="examSubjectHint">
                                 <option value="all">全部学科</option>
                             </select>
                             <div class="setup-hint" id="examSubjectHint">共 0 道题</div>
                         </div>
-                        <div class="setup-card">
-                            <div class="setup-card-icon" aria-hidden="true">📝</div>
-                            <label class="setup-label" for="examCount">题目数量</label>
-                            <select id="examCount" class="select-control">
+                        <div class="setup-card setup-card-count">
+                            <div class="setup-card-head">
+                                <span class="setup-card-mark" aria-hidden="true"></span>
+                                <div>
+                                    <div class="setup-card-title">题目数量</div>
+                                    <div class="setup-card-note">控制单次训练规模</div>
+                                </div>
+                            </div>
+                            <select id="examCount" class="select-control" aria-label="选择题目数量">
                                 <option value="20">20题（快速练习）</option>
                                 <option value="50">50题（标准练习）</option>
                                 <option value="100">100题（全面练习）</option>
                                 <option value="all">全部题目</option>
                             </select>
                         </div>
-                        <div class="setup-card">
-                            <div class="setup-card-icon" aria-hidden="true">⏰</div>
-                            <label class="setup-label" for="examTime">考试时间</label>
-                            <select id="examTime" class="select-control">
+                        <div class="setup-card setup-card-time">
+                            <div class="setup-card-head">
+                                <span class="setup-card-mark" aria-hidden="true"></span>
+                                <div>
+                                    <div class="setup-card-title">考试时间</div>
+                                    <div class="setup-card-note">设置本次答题时长</div>
+                                </div>
+                            </div>
+                            <select id="examTime" class="select-control" aria-label="选择考试时间">
                                 <option value="30">30 分钟</option>
                                 <option value="60">60 分钟</option>
                                 <option value="90">90 分钟</option>
@@ -323,8 +334,11 @@
                     <!-- 智能推题选项 -->
                     <div class="smart-options-card">
                         <div class="smart-options-header">
-                            <span class="smart-options-icon">🧠</span>
-                            <span class="smart-options-title">智能推题</span>
+                            <span class="smart-options-mark" aria-hidden="true"></span>
+                            <div>
+                                <span class="smart-options-title">智能推题</span>
+                                <p class="smart-options-desc">根据错题、标签和收藏状态，让抽题更贴近复习节奏。</p>
+                            </div>
                         </div>
                         <div class="smart-options-body">
                             <label class="smart-option">
@@ -350,9 +364,7 @@
                         </div>
                     </div>
                     <div class="start-exam-wrap">
-                        <button class="btn-start-exam" onclick="startExam()" aria-label="开始考试">
-                            <span aria-hidden="true">🚀</span> 开始考试
-                        </button>
+                        <button class="btn-start-exam" onclick="startExam()" aria-label="开始考试">开始考试</button>
                     </div>
                 </div>
 
@@ -371,7 +383,7 @@
                         </div>
                         <div class="exam-subject-tag" id="examSubjectTag"></div>
                         <div class="exam-timer" id="timer">60:00</div>
-                        <button class="btn btn-sm btn-secondary exam-answer-toggle" id="answerCardToggleBtn" type="button" onclick="toggleAnswerCard()" aria-expanded="false">📋 答题卡</button>
+                        <button class="btn btn-sm btn-secondary exam-answer-toggle" id="answerCardToggleBtn" type="button" onclick="toggleAnswerCard()" aria-expanded="false">答题卡</button>
                     </div>
                     <div class="answer-card-backdrop" id="answerCardBackdrop" onclick="toggleAnswerCard()"></div>
                     <!-- 答题卡面板 -->
@@ -451,31 +463,31 @@
                 </div>
                 <div class="stats-overview">
                     <div class="stat-card">
-                        <div class="stat-icon">📚</div>
+                        <div class="stat-icon">总题数</div>
                         <div class="stat-body">
                             <div class="stat-value" id="totalQuestionsCount">0</div>
-                            <div class="stat-label">总题数</div>
+                            <div class="stat-label">题库规模</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">✍️</div>
+                        <div class="stat-icon">已练习</div>
                         <div class="stat-body">
                             <div class="stat-value" id="practicedCount">0</div>
-                            <div class="stat-label">已练习</div>
+                            <div class="stat-label">累计练习</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
+                        <div class="stat-icon">正确率</div>
                         <div class="stat-body">
                             <div class="stat-value" id="accuracyRate">0%</div>
-                            <div class="stat-label">正确率</div>
+                            <div class="stat-label">当前表现</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">❌</div>
+                        <div class="stat-icon">错题数</div>
                         <div class="stat-body">
                             <div class="stat-value" id="wrongCount">0</div>
-                            <div class="stat-label">错题数</div>
+                            <div class="stat-label">待复习量</div>
                         </div>
                     </div>
                 </div>
@@ -483,7 +495,7 @@
                 <!-- 学习热力图 -->
                 <div class="chart-card">
                     <div class="chart-card-header">
-                        <h3>🗓️ 学习热力图</h3>
+                        <h3>学习热力图</h3>
                     </div>
                     <div class="heatmap-container" id="heatmapContainer"></div>
                     <div class="heatmap-legend">
@@ -510,7 +522,7 @@
                 <!-- 学科雷达图 -->
                 <div class="chart-card">
                     <div class="chart-card-header">
-                        <h3>📊 学科正确率雷达图</h3>
+                        <h3>学科正确率雷达图</h3>
                     </div>
                     <div class="radar-chart-container">
                         <canvas id="radarChart" width="260" height="260"></canvas>
@@ -520,7 +532,7 @@
                 <!-- 练习趋势 -->
                 <div class="chart-card">
                     <div class="chart-card-header">
-                        <h3>📈 练习趋势</h3>
+                        <h3>练习趋势</h3>
                         <div class="chart-period-btns">
                             <button class="period-btn active" id="period7" onclick="changeChartPeriod('7')">近7天</button>
                             <button class="period-btn" id="period30" onclick="changeChartPeriod('30')">近30天</button>
@@ -539,7 +551,7 @@
                 <!-- 正确率趋势图 -->
                 <div class="chart-card">
                     <div class="chart-card-header">
-                        <h3>🎯 正确率趋势</h3>
+                        <h3>正确率趋势</h3>
                     </div>
                     <div class="chart-wrap">
                         <canvas id="accuracyChart" width="800" height="200"></canvas>
@@ -558,23 +570,23 @@
     <!-- 移动端底部导航 -->
     <nav class="mobile-nav" id="mobileNav" aria-label="移动端导航">
         <button class="mobile-nav-item active" data-tab="subjects" onclick="switchTab('subjects')">
-            <span class="mobile-nav-icon" aria-hidden="true">🏠</span>
+            <span class="mobile-nav-icon" aria-hidden="true"></span>
             <span class="mobile-nav-label">题库</span>
         </button>
         <button class="mobile-nav-item" data-tab="browse" onclick="switchTab('browse')">
-            <span class="mobile-nav-icon" aria-hidden="true">📚</span>
+            <span class="mobile-nav-icon" aria-hidden="true"></span>
             <span class="mobile-nav-label">浏览</span>
         </button>
         <button class="mobile-nav-item" data-tab="exam" onclick="switchTab('exam')">
-            <span class="mobile-nav-icon" aria-hidden="true">✏️</span>
+            <span class="mobile-nav-icon" aria-hidden="true"></span>
             <span class="mobile-nav-label">答题</span>
         </button>
         <button class="mobile-nav-item" data-tab="wrong" onclick="switchTab('wrong')">
-            <span class="mobile-nav-icon" aria-hidden="true">❌</span>
+            <span class="mobile-nav-icon" aria-hidden="true"></span>
             <span class="mobile-nav-label">错题</span>
         </button>
         <button class="mobile-nav-item" data-tab="history" onclick="switchTab('history')">
-            <span class="mobile-nav-icon" aria-hidden="true">📋</span>
+            <span class="mobile-nav-icon" aria-hidden="true"></span>
             <span class="mobile-nav-label">记录</span>
         </button>
     </nav>
