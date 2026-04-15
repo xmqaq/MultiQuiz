@@ -18,7 +18,10 @@ let availableTags = ['重点', '易错', '已掌握', '需复习', '常考']; //
 let favoriteQuestionIds = [];
 let favoriteSet = new Set();
 let mobileBrowseFiltersExpanded = false;
+let browseAnswerMode = 'show';
+let revealedBrowseAnswers = new Set();
 const SIDEBAR_COLLAPSE_KEY = 'sidebarCollapsed';
+const BROWSE_ANSWER_MODE_KEY = 'browseAnswerMode';
 
 // =============================================
 // 工具函数 - 安全存储
@@ -132,6 +135,7 @@ function loadData() {
     examHistory = parseStorageJSON('examHistory', []);
     questionTags = parseStorageJSON('questionTags', {});
     favoriteQuestionIds = parseStorageJSON('favoriteQuestionIds', []);
+    browseAnswerMode = parseStorageJSON(BROWSE_ANSWER_MODE_KEY, 'show') === 'hide' ? 'hide' : 'show';
     if (!Array.isArray(favoriteQuestionIds)) favoriteQuestionIds = [];
     favoriteSet = new Set(favoriteQuestionIds.map(id => String(id)));
 
@@ -162,6 +166,7 @@ function renderAll() {
     updateSidebarStats();
     updateSubjectSelects();
     updateStats();
+    updateBrowseAnswerModeButton();
     displayWrongQuestions();
     displayBrowseQuestions();
 }
@@ -642,6 +647,23 @@ function browseSubject(subjectId) {
     }, 50);
 }
 
+function showSubjectActions() {
+    showModal(`
+        <div class="modal-header">
+            <h3 class="modal-title">题库管理</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom:16px;color:var(--text-secondary)">低频管理操作集中在这里，首页保留更清晰的主入口。</p>
+            <div class="modal-actions modal-actions-col">
+                <button class="btn btn-secondary" onclick="closeModal(); document.getElementById('restoreFileInput').click()">📥 导入配置</button>
+                <button class="btn btn-secondary" onclick="closeModal(); exportAllBackup()">📤 导出配置</button>
+                <button class="btn btn-outline" onclick="closeModal(); deduplicateLibrary()">🧹 题库去重</button>
+            </div>
+        </div>
+    `);
+}
+
 function renameSubject(subjectId) {
     const subject = subjects.find(s => s.id === subjectId);
     if (!subject) return;
@@ -970,6 +992,48 @@ function onBrowseFilterChange() {
     updateMobileBrowseFilterState();
 }
 
+function updateBrowseAnswerModeButton() {
+    const btn = document.getElementById('browseAnswerModeBtn');
+    if (!btn) return;
+    const hideMode = browseAnswerMode === 'hide';
+    btn.textContent = hideMode ? '显示答案' : '隐藏答案';
+    btn.classList.toggle('active', hideMode);
+}
+
+function toggleBrowseAnswerMode() {
+    browseAnswerMode = browseAnswerMode === 'hide' ? 'show' : 'hide';
+    if (browseAnswerMode === 'show') {
+        revealedBrowseAnswers.clear();
+    }
+    safeSetItem(BROWSE_ANSWER_MODE_KEY, JSON.stringify(browseAnswerMode));
+    updateBrowseAnswerModeButton();
+    displayBrowseQuestions();
+}
+
+function toggleBrowseAnswerReveal(questionId) {
+    const key = questionIdKey(questionId);
+    if (revealedBrowseAnswers.has(key)) revealedBrowseAnswers.delete(key);
+    else revealedBrowseAnswers.add(key);
+    displayBrowseQuestions();
+}
+
+function showBrowseActions() {
+    showModal(`
+        <div class="modal-header">
+            <h3 class="modal-title">浏览页操作</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom:16px;color:var(--text-secondary)">把低频操作集中起来，浏览页首屏会更聚焦题目本身。</p>
+            <div class="modal-actions modal-actions-col">
+                <button class="btn btn-secondary" onclick="closeModal(); showLibraryInfo()">📊 题库信息</button>
+                <button class="btn btn-secondary" onclick="closeModal(); showExportOptions()">📤 导出当前范围</button>
+                <button class="btn btn-danger" onclick="closeModal(); clearLibrary()">🗑️ 清空当前范围</button>
+            </div>
+        </div>
+    `);
+}
+
 function displayBrowseQuestions(questionsToShow) {
     const container = document.getElementById('questionsList');
     const subjectFilter = document.getElementById('browseSubjectFilter')?.value || 'all';
@@ -1023,6 +1087,8 @@ function displayBrowseQuestions(questionsToShow) {
 function renderQuestionItem(q, i) {
     const tags = questionTags[q.id] || [];
     const favored = isFavorited(q.id);
+    const hideAnswer = browseAnswerMode === 'hide';
+    const answerVisible = !hideAnswer || revealedBrowseAnswers.has(questionIdKey(q.id));
     return `
         <div class="q-item" data-id="${q.id}">
             <div class="q-item-header">
@@ -1040,7 +1106,12 @@ function renderQuestionItem(q, i) {
                 <div class="q-opt">C. ${escapeHtml(q.optionC)}</div>
                 <div class="q-opt">D. ${escapeHtml(q.optionD)}</div>
             </div>
-            <div class="q-answer">正确答案：<strong>${q.answer}</strong></div>
+            <div class="q-answer ${answerVisible ? '' : 'collapsed'}">
+                ${answerVisible
+                    ? `正确答案：<strong>${q.answer}</strong>${hideAnswer ? `<button class="btn btn-sm btn-ghost q-answer-toggle" onclick='toggleBrowseAnswerReveal(${JSON.stringify(q.id)})'>收起答案</button>` : ''}`
+                    : `<button class="btn btn-sm btn-secondary q-answer-toggle" onclick='toggleBrowseAnswerReveal(${JSON.stringify(q.id)})'>显示答案</button>`
+                }
+            </div>
             ${tags.length > 0 ? `<div class="q-tags">${tags.map(t => `<span class="q-tag tag-${t}">${t}</span>`).join('')}</div>` : ''}
         </div>
     `;

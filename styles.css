@@ -240,8 +240,13 @@ body {
     align-items: center;
 }
 
+.subject-header-actions {
+    gap: 10px;
+}
+
 /* ===== Mobile-only hooks ===== */
 .mobile-quick-actions,
+.mobile-quick-footer,
 .browse-mobile-toggle,
 .answer-card-backdrop,
 .answer-card-close {
@@ -566,11 +571,8 @@ body {
 
 /* ===== Browse Page ===== */
 .browse-toolbar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
-    gap: 16px;
+    display: block;
     margin-bottom: 16px;
-    align-items: stretch;
 }
 
 .browse-panel {
@@ -587,6 +589,14 @@ body {
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 14px;
+}
+
+.browse-head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .browse-panel-eyebrow {
@@ -616,6 +626,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+.browse-panel-main {
+    border-radius: 20px;
+    padding: 20px;
 }
 
 .browse-filter-grid {
@@ -658,17 +673,6 @@ body {
 
 .browse-search-actions .btn {
     min-width: 88px;
-}
-
-.browse-action-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-}
-
-.browse-action-grid .btn {
-    width: 100%;
-    justify-content: center;
 }
 
 .select-control {
@@ -724,6 +728,10 @@ body {
     gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 16px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(229,231,235,0.95);
 }
 
 .tag-chip {
@@ -824,18 +832,22 @@ body {
 .questions-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .q-item {
     background: var(--card-bg);
-    border-radius: var(--radius);
+    border-radius: 16px;
     border: 1px solid var(--border);
-    padding: 16px 20px;
-    transition: box-shadow 0.15s;
+    padding: 18px 20px;
+    transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
 }
 
-.q-item:hover { box-shadow: var(--shadow); }
+.q-item:hover {
+    box-shadow: var(--shadow);
+    border-color: rgba(79,110,247,0.24);
+    transform: translateY(-1px);
+}
 
 .q-item-header {
     display: flex;
@@ -879,6 +891,12 @@ body {
     margin-bottom: 12px;
 }
 
+.q-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
 .q-opts {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -889,10 +907,10 @@ body {
 .q-opt {
     font-size: 13px;
     color: var(--text-secondary);
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: #f5f7fa;
-    border: 1px solid transparent;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #f7f8fc;
+    border: 1px solid rgba(229,231,235,0.9);
 }
 
 .q-opt.correct-opt {
@@ -905,8 +923,28 @@ body {
     font-size: 13px;
     color: var(--success);
     font-weight: 600;
-    padding-top: 4px;
+    padding-top: 12px;
+    margin-top: 12px;
     border-top: 1px solid rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.q-answer.collapsed {
+    border-top-style: dashed;
+    color: var(--text-secondary);
+}
+
+.q-answer-toggle {
+    margin-left: auto;
+}
+
+.browse-answer-mode-btn.active {
+    background: var(--primary-light);
+    color: var(--primary);
 }
 
 /* ===== Exam Setup ===== */
@@ -2092,7 +2130,7 @@ body.sidebar-collapsed .sidebar-footer {
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
     min-height: calc(64px + env(safe-area-inset-bottom));
     z-index: 9999;
-    justify-content: space-around;
+    justify-content: space-between;
     box-shadow: 0 -12px 28px rgba(15,23,42,0.12);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -2118,13 +2156,15 @@ body.sidebar-collapsed .sidebar-footer {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 6px 12px;
+    padding: 6px 8px;
     background: none;
     border: none;
     color: var(--text-secondary);
     font-size: 10px;
     cursor: pointer;
     transition: all 0.15s;
+    flex: 1;
+    min-width: 0;
 }
 
 .mobile-nav-item.active {
@@ -2140,10 +2180,6 @@ body.sidebar-collapsed .sidebar-footer {
 }
 
 @media (max-width: 1180px) {
-    .browse-toolbar {
-        grid-template-columns: 1fr;
-    }
-
     .browse-filter-grid {
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     }
@@ -2206,6 +2242,16 @@ body.sidebar-collapsed .sidebar-footer {
         grid-template-columns: 1fr;
         gap: 10px;
         margin-bottom: 18px;
+    }
+
+    .mobile-quick-footer {
+        display: flex;
+        margin: -4px 0 18px;
+    }
+
+    .mobile-quick-footer .btn {
+        width: 100%;
+        justify-content: center;
     }
 
     .mobile-quick-action {
@@ -2278,11 +2324,6 @@ body.sidebar-collapsed .sidebar-footer {
         border-radius: 22px 22px 0 0;
     }
 
-    .browse-toolbar {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
     .browse-panel {
         padding: 16px;
         border-radius: 16px;
@@ -2290,6 +2331,16 @@ body.sidebar-collapsed .sidebar-footer {
 
     .browse-panel-head {
         margin-bottom: 12px;
+    }
+
+    .browse-head-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .browse-head-actions .btn {
+        flex: 1;
+        justify-content: center;
     }
 
     .browse-mobile-toggle {
@@ -2346,17 +2397,6 @@ body.sidebar-collapsed .sidebar-footer {
 
     .browse-filter-grid.mobile-expanded {
         display: grid;
-    }
-
-    .browse-action-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    .browse-action-grid .btn {
-        min-height: 42px;
-        padding-inline: 10px;
-        font-size: 12px;
     }
 
     .browse-search-wrap {
@@ -2675,6 +2715,10 @@ body.sidebar-collapsed .sidebar-footer {
         gap: 8px;
     }
 
+    .mobile-quick-footer {
+        margin-bottom: 16px;
+    }
+
     .mobile-quick-action {
         padding: 12px 14px;
         border-radius: 14px;
@@ -2768,6 +2812,16 @@ body.sidebar-collapsed .sidebar-footer {
         gap: 8px;
     }
 
+    .q-answer {
+        align-items: stretch;
+    }
+
+    .q-answer-toggle {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
     .q-item-header {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -2841,7 +2895,6 @@ body.sidebar-collapsed .sidebar-footer {
     .history-actions,
     .history-header-actions,
     .wrong-header-actions,
-    .browse-action-grid,
     .chart-period-btns {
         grid-template-columns: 1fr;
     }

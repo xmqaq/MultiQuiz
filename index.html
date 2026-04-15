@@ -91,10 +91,8 @@
                     </div>
                     <div class="header-actions subject-header-actions">
                         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreFromBackup(this)">
-                        <button class="btn btn-secondary" onclick="document.getElementById('restoreFileInput').click()">📥 导入配置</button>
-                        <button class="btn btn-secondary" onclick="exportAllBackup()">📤 导出配置</button>
-                        <button class="btn btn-outline" onclick="deduplicateLibrary()">🧹 题库去重</button>
                         <button class="btn btn-primary" onclick="switchTab('import')"><span>+</span> 导入新题库</button>
+                        <button class="btn btn-secondary" onclick="showSubjectActions()">管理操作</button>
                     </div>
                 </div>
 
@@ -113,20 +111,6 @@
                             <span class="mobile-quick-desc">从备份文件恢复</span>
                         </span>
                     </button>
-                    <button class="mobile-quick-action" type="button" onclick="exportAllBackup()">
-                        <span class="mobile-quick-icon" aria-hidden="true">📤</span>
-                        <span class="mobile-quick-text">
-                            <span class="mobile-quick-title">导出配置</span>
-                            <span class="mobile-quick-desc">备份全部学习数据</span>
-                        </span>
-                    </button>
-                    <button class="mobile-quick-action" type="button" onclick="deduplicateLibrary()">
-                        <span class="mobile-quick-icon" aria-hidden="true">🧹</span>
-                        <span class="mobile-quick-text">
-                            <span class="mobile-quick-title">题库去重</span>
-                            <span class="mobile-quick-desc">清理重复题目</span>
-                        </span>
-                    </button>
                     <button class="mobile-quick-action" type="button" onclick="switchTab('history')">
                         <span class="mobile-quick-icon" aria-hidden="true">📋</span>
                         <span class="mobile-quick-text">
@@ -134,6 +118,9 @@
                             <span class="mobile-quick-desc">查看历次练习成绩</span>
                         </span>
                     </button>
+                </div>
+                <div class="mobile-quick-footer">
+                    <button class="btn btn-secondary" type="button" onclick="showSubjectActions()">更多管理操作</button>
                 </div>
 
                 <div id="subjectCards" class="subject-grid">
@@ -227,12 +214,18 @@
                     </div>
                 </div>
                 <div class="browse-toolbar">
-                    <div class="browse-panel toolbar-left">
+                    <div class="browse-panel toolbar-left browse-panel-main">
                         <div class="browse-panel-head">
                             <div>
                                 <div class="browse-panel-eyebrow">筛选条件</div>
                                 <div class="browse-panel-title">快速定位题目</div>
-                                <p class="browse-panel-desc">按学科、标签、收藏状态或关键词快速筛题</p>
+                                <p class="browse-panel-desc">聚焦搜索与筛选，把更多空间留给题目内容</p>
+                            </div>
+                            <div class="browse-head-actions">
+                                <button class="btn btn-secondary browse-answer-mode-btn" id="browseAnswerModeBtn" type="button" onclick="toggleBrowseAnswerMode()">
+                                    隐藏答案
+                                </button>
+                                <button class="btn btn-ghost" type="button" onclick="showBrowseActions()">更多操作</button>
                             </div>
                         </div>
                         <button class="browse-mobile-toggle" id="browseMobileFilterToggle" type="button" onclick="toggleMobileBrowseFilters()" aria-expanded="false" aria-controls="browseFilterGrid">
@@ -274,20 +267,6 @@
                                 </div>
                             </div>
                             <p class="browse-search-hint">支持按题干和选项内容实时筛选</p>
-                        </div>
-                    </div>
-                    <div class="browse-panel toolbar-right">
-                        <div class="browse-panel-head">
-                            <div>
-                                <div class="browse-panel-eyebrow">快捷操作</div>
-                                <div class="browse-panel-title">题库管理</div>
-                                <p class="browse-panel-desc">查看统计、导出内容或清空当前题库</p>
-                            </div>
-                        </div>
-                        <div class="browse-action-grid">
-                            <button class="btn btn-sm btn-secondary" onclick="showLibraryInfo()">📊 题库信息</button>
-                            <button class="btn btn-sm btn-secondary" onclick="showExportOptions()">📤 导出</button>
-                            <button class="btn btn-sm btn-danger" onclick="clearLibrary()">🗑️ 清空</button>
                         </div>
                     </div>
                 </div>
@@ -594,9 +573,9 @@
             <span class="mobile-nav-icon" aria-hidden="true">❌</span>
             <span class="mobile-nav-label">错题</span>
         </button>
-        <button class="mobile-nav-item" data-tab="stats" onclick="switchTab('stats')">
-            <span class="mobile-nav-icon" aria-hidden="true">📊</span>
-            <span class="mobile-nav-label">统计</span>
+        <button class="mobile-nav-item" data-tab="history" onclick="switchTab('history')">
+            <span class="mobile-nav-icon" aria-hidden="true">📋</span>
+            <span class="mobile-nav-label">记录</span>
         </button>
     </nav>
 
