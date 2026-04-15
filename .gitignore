@@ -1,2 +1,6 @@
 .DS_Store
 data.json
+.claude/
+.codebuddy/
+.serena/
+2026-04-07.json
