@@ -20,6 +20,7 @@ let favoriteSet = new Set();
 let mobileBrowseFiltersExpanded = false;
 let browseAnswerMode = 'show';
 let revealedBrowseAnswers = new Set();
+let currentTab = 'subjects';
 const SIDEBAR_COLLAPSE_KEY = 'sidebarCollapsed';
 const BROWSE_ANSWER_MODE_KEY = 'browseAnswerMode';
 
@@ -513,6 +514,10 @@ function isExamInProgress() {
 }
 
 function switchTab(tab) {
+    if (tab === currentTab) {
+        closeSidebarOnMobile();
+        return;
+    }
     // 只有未交卷的活跃考试才拦截切换；成绩页/已交卷状态不再提示
     if (!_examLeaveConfirmed && tab !== 'exam' && isExamInProgress()) {
         showExamSwitchConfirm(tab);
@@ -545,18 +550,22 @@ function switchTab(tab) {
 
     const page = document.getElementById(`page-${tab}`);
     if (page) page.classList.add('active');
+    currentTab = tab;
 
-    if (tab === 'history') showExamHistory();
+    if (tab === 'history') {
+        requestAnimationFrame(() => showExamHistory());
+    }
     if (tab === 'stats') {
-        updateStats();
-        renderSubjectDist();
-        setTimeout(() => drawPracticeChart(currentChartPeriod), 100);
+        requestAnimationFrame(() => {
+            updateStats();
+            renderSubjectDist();
+            requestAnimationFrame(() => drawPracticeChart(currentChartPeriod));
+        });
     }
     if (tab === 'exam') {
         updateExamSubjectSelect();
         onExamSubjectChange();
     }
-    if (tab === 'browse') displayBrowseQuestions();
 
     updateMobileTopbar(tab);
     closeSidebarOnMobile();
@@ -1105,13 +1114,13 @@ function renderQuestionItem(q, i) {
     const favored = isFavorited(q.id);
     const hideAnswer = browseAnswerMode === 'hide';
     const answerVisible = !hideAnswer || revealedBrowseAnswers.has(questionIdKey(q.id));
+    const tagsHtml = renderQuestionTagsHtml(q.id);
     return `
         <div class="q-item" data-id="${q.id}">
             <div class="q-item-header">
                 <div class="q-item-meta">
                     <span class="q-num">${i + 1}</span>
                     <span class="q-subject-tag">${escapeHtml(q._subjectName || '')}</span>
-                    ${renderQuestionTagsHtml(q.id)}
                 </div>
                 <div class="q-item-actions">
                     <button class="icon-btn fav-btn ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favored ? '★' : '☆'}</button>
@@ -1121,6 +1130,7 @@ function renderQuestionItem(q, i) {
             <div class="q-text-wrap">
                 <div class="q-text">${escapeHtml(q.question)}</div>
             </div>
+            ${tagsHtml}
             <div class="q-options">
                 ${['A', 'B', 'C', 'D'].map(opt => `
                     <div class="q-opt">
@@ -1249,14 +1259,14 @@ function toggleQuestionTag(questionId, tag, evt) {
     // 只更新这一道题目的标签显示，不重渲染整个列表
     const qItem = document.querySelector(`.q-item[data-id="${CSS.escape(questionId)}"]`);
     if (qItem) {
-        const tagsDiv = qItem.querySelector('.q-item-meta .q-tags');
-        const meta = qItem.querySelector('.q-item-meta');
+        const tagsDiv = qItem.querySelector('.q-tags');
+        const textWrap = qItem.querySelector('.q-text-wrap');
         const html = renderQuestionTagsHtml(questionId);
         if (html) {
             if (tagsDiv) {
                 tagsDiv.outerHTML = html;
-            } else if (meta) {
-                meta.insertAdjacentHTML('beforeend', html);
+            } else if (textWrap) {
+                textWrap.insertAdjacentHTML('afterend', html);
             }
         } else if (tagsDiv) {
             tagsDiv.remove();
