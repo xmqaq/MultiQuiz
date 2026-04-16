@@ -1,2 +1,3 @@
 *.json
 !templates/*.json
+.DS_Store
