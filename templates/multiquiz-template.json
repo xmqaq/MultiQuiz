@@ -1,0 +1,20 @@
+{
+  "questions": [
+    {
+      "question": "中国近代史的开端是？",
+      "optionA": "鸦片战争",
+      "optionB": "甲午战争",
+      "optionC": "辛亥革命",
+      "optionD": "五四运动",
+      "answer": "A"
+    },
+    {
+      "question": "马克思主义中国化的第一次历史性飞跃形成了什么理论成果？",
+      "optionA": "邓小平理论",
+      "optionB": "毛泽东思想",
+      "optionC": "科学发展观",
+      "optionD": "三个代表重要思想",
+      "answer": "B"
+    }
+  ]
+}

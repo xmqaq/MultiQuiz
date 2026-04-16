@@ -278,12 +278,37 @@ function cleanupOrphanFavorites() {
     }
 }
 
+function favoriteButtonIcon(active) {
+    if (active) {
+        return `
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path d="M10 2.7l2.14 4.34 4.79.7-3.47 3.38.82 4.77L10 13.7l-4.28 2.19.82-4.77-3.47-3.38 4.79-.7L10 2.7Z" fill="currentColor"/>
+            </svg>
+        `;
+    }
+    return `
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M10 2.7l2.14 4.34 4.79.7-3.47 3.38.82 4.77L10 13.7l-4.28 2.19.82-4.77-3.47-3.38 4.79-.7L10 2.7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+    `;
+}
+
+function tagButtonIcon() {
+    return `
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M10.8 4H6.6a1.6 1.6 0 0 0-1.13.47L3.4 6.54A1.6 1.6 0 0 0 3.4 8.8l6.8 6.8a1.6 1.6 0 0 0 2.26 0l4.07-4.07a1.6 1.6 0 0 0 0-2.26l-3.47-3.47A2.6 2.6 0 0 0 10.8 4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="7.1" cy="7.1" r="1.05" fill="currentColor"/>
+        </svg>
+    `;
+}
+
 function applyFavoriteButtonState(btn, active) {
     if (!btn) return;
     btn.classList.toggle('active', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     btn.setAttribute('title', active ? '取消收藏' : '收藏题目');
-    btn.textContent = active ? '★' : '☆';
+    btn.setAttribute('aria-label', active ? '取消收藏' : '收藏题目');
+    btn.innerHTML = favoriteButtonIcon(active);
 }
 
 function refreshFavoriteButtons(questionId) {
@@ -406,7 +431,7 @@ function updateMobileTopbar(tab) {
     const page = tab ? document.getElementById(`page-${tab}`) : document.querySelector('.page.active');
     const currentPage = page || document.getElementById('page-subjects');
     const title = currentPage?.querySelector('.page-title')?.textContent?.trim() || '题库中心';
-    const subtitle = currentPage?.querySelector('.page-subtitle')?.textContent?.trim() || '选择题练习平台';
+    const subtitle = currentPage?.querySelector('.page-subtitle')?.textContent?.trim() || '题库练习平台';
 
     titleEl.textContent = title;
     subtitleEl.textContent = subtitle;
@@ -555,6 +580,9 @@ function switchTab(tab) {
     if (tab === 'history') {
         requestAnimationFrame(() => showExamHistory());
     }
+    if (tab === 'subjects') {
+        renderSubjectCards();
+    }
     if (tab === 'stats') {
         requestAnimationFrame(() => {
             updateStats();
@@ -578,15 +606,15 @@ function renderSubjectCards() {
     const container = document.getElementById('subjectCards');
     const empty = document.getElementById('subjectEmptyState');
 
+    // 先清掉现有卡片，再根据最新数据决定显示空状态还是重新渲染
+    const existingCards = container.querySelectorAll('.subject-card');
+    existingCards.forEach(c => c.remove());
+
     if (subjects.length === 0) {
         empty.style.display = 'flex';
         return;
     }
     empty.style.display = 'none';
-
-    // 保留 empty，仅移除已有卡片
-    const existingCards = container.querySelectorAll('.subject-card');
-    existingCards.forEach(c => c.remove());
 
     subjects.forEach(subject => {
         const wrongCount = wrongQuestions.filter(q => q.subjectId === subject.id).length;
@@ -648,11 +676,12 @@ function showSubjectActions() {
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
         <div class="modal-body">
-            <p style="margin-bottom:16px;color:var(--text-secondary)">低频管理操作集中在这里，首页保留更清晰的主入口。</p>
+            <p style="margin-bottom:16px;color:var(--text-secondary)">低频管理操作集中在这里，首页保留导入题库与导入配置入口。</p>
             <div class="modal-actions modal-actions-col">
-                <button class="btn btn-secondary" onclick="closeModal(); document.getElementById('restoreFileInput').click()">📥 导入配置</button>
-                <button class="btn btn-secondary" onclick="closeModal(); exportAllBackup()">📤 导出配置</button>
-                <button class="btn btn-outline" onclick="closeModal(); deduplicateLibrary()">🧹 题库去重</button>
+                <button class="btn btn-secondary" onclick="closeModal(); showLibraryInfo()">查看题库信息</button>
+                <button class="btn btn-secondary" onclick="closeModal(); exportAllBackup()">导出配置</button>
+                <button class="btn btn-secondary" onclick="closeModal(); deduplicateLibrary()">题库去重</button>
+                <button class="btn btn-danger" onclick="closeModal(); clearLibrary()">清空全部题库</button>
             </div>
         </div>
     `);
@@ -880,6 +909,24 @@ function handleFile(file) {
     }
 }
 
+function downloadStaticFile(filePath, downloadName, successMessage) {
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.download = downloadName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast(successMessage, 'success');
+}
+
+function downloadExcelTemplate() {
+    downloadStaticFile('./templates/multiquiz-template.xlsx', 'MultiQuiz-Excel题库模板.xlsx', 'Excel 模板已下载');
+}
+
+function downloadJsonTemplate() {
+    downloadStaticFile('./templates/multiquiz-template.json', 'MultiQuiz-JSON题库模板.json', 'JSON 模板已下载');
+}
+
 function parseExcel(file, subjectName) {
     showToast('正在读取文件...', 'info');
     const reader = new FileReader();
@@ -1034,7 +1081,6 @@ function toggleBrowseAnswerReveal(questionId) {
 function showBrowseActions() {
     const { subject, questionCount } = getBrowseScopeInfo();
     const scopeTitle = subject ? `当前题库：${escapeHtml(subject.name)}` : '当前范围：全部题库';
-    const clearLabel = subject ? `清空当前题库（${escapeHtml(subject.name)}）` : '清空全部题库';
 
     showModal(`
         <div class="modal-header">
@@ -1042,13 +1088,11 @@ function showBrowseActions() {
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
         <div class="modal-body">
-            <p class="browse-actions-note">${scopeTitle}，共 ${questionCount} 道题。这里保留低频操作，首屏更聚焦题目本身。</p>
+            <p class="browse-actions-note">${scopeTitle}，共 ${questionCount} 道题。这里仅保留当前范围导出操作，题库级管理已移至题库中心。</p>
             <div class="modal-actions modal-actions-col">
-                <button class="btn btn-secondary" onclick="closeModal(); showLibraryInfo()">查看题库信息</button>
                 <button class="btn btn-secondary" onclick="exportAsJSON()">导出当前题目为 JSON</button>
                 <button class="btn btn-secondary" onclick="exportAsPDF()">导出当前题目为 PDF</button>
                 <button class="btn btn-secondary" onclick="exportAsText()">导出当前题目为文本</button>
-                <button class="btn btn-danger" onclick="closeModal(); clearLibrary()">${clearLabel}</button>
             </div>
         </div>
     `);
@@ -1123,8 +1167,8 @@ function renderQuestionItem(q, i) {
                     <span class="q-subject-tag">${escapeHtml(q._subjectName || '')}</span>
                 </div>
                 <div class="q-item-actions">
-                    <button class="icon-btn fav-btn ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favored ? '★' : '☆'}</button>
-                    <button class="icon-btn" onclick='showTagEditor(${JSON.stringify(q.id)})' title="编辑标签">标签</button>
+                    <button class="icon-btn fav-btn ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-label="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favoriteButtonIcon(favored)}</button>
+                    <button class="icon-btn q-tag-action-btn" onclick='showTagEditor(${JSON.stringify(q.id)})' title="编辑标签" aria-label="编辑标签">${tagButtonIcon()}</button>
                 </div>
             </div>
             <div class="q-text-wrap">
@@ -1329,15 +1373,40 @@ function initSearch() {
 
 function showLibraryInfo() {
     const total = subjects.reduce((n, s) => n + s.questions.length, 0);
-    const rows = subjects.map(s => `<tr><td>${s.name}</td><td>${s.questions.length}</td></tr>`).join('');
+    const rows = subjects.map(s => `
+        <div class="library-info-row">
+            <div class="library-info-name">${escapeHtml(s.name)}</div>
+            <div class="library-info-count">${s.questions.length}</div>
+        </div>
+    `).join('');
+
     showModal(`
-        <h3 class="modal-title">题库信息</h3>
-        <table class="info-table">
-            <thead><tr><th>学科</th><th>题目数</th></tr></thead>
-            <tbody>${rows}</tbody>
-            <tfoot><tr><td><strong>合计</strong></td><td><strong>${total}</strong></td></tr></tfoot>
-        </table>
-        <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">确定</button></div>
+        <div class="modal-header">
+            <h3 class="modal-title">题库信息</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body library-info-body">
+            <div class="library-info-summary">
+                <div class="library-info-summary-item">
+                    <div class="library-info-summary-value">${subjects.length}</div>
+                    <div class="library-info-summary-label">学科数</div>
+                </div>
+                <div class="library-info-summary-item">
+                    <div class="library-info-summary-value">${total}</div>
+                    <div class="library-info-summary-label">总题数</div>
+                </div>
+            </div>
+            <div class="library-info-list">
+                <div class="library-info-list-head">
+                    <span>学科</span>
+                    <span>题目数</span>
+                </div>
+                <div class="library-info-list-body">
+                    ${rows}
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">知道了</button></div>
     `);
 }
 
@@ -1829,7 +1898,7 @@ function showQuestion() {
         <div class="q-card-top">
             <span class="q-card-index">${currentExam.currentIndex + 1}</span>
             <span class="q-card-subject">${escapeHtml(q._subjectName || currentExam.subjectName)}</span>
-            <button class="icon-btn fav-btn q-card-fav ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favored ? '★' : '☆'}</button>
+            <button class="icon-btn fav-btn q-card-fav ${favored ? 'active' : ''}" data-fav-id="${escapeHtml(String(q.id))}" onclick='toggleFavorite(${JSON.stringify(q.id)}, event)' title="${favored ? '取消收藏' : '收藏题目'}" aria-label="${favored ? '取消收藏' : '收藏题目'}" aria-pressed="${favored ? 'true' : 'false'}">${favoriteButtonIcon(favored)}</button>
         </div>
         <div class="q-exam-text">${escapeHtml(q.question)}</div>
         <div class="q-exam-options">
@@ -2902,11 +2971,20 @@ function showConfirmWithOptions(message, options) {
 // Toast 通知
 // =============================================
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
+    let container = document.getElementById('globalToastContainer') || document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+    }
+    if (container.id !== 'globalToastContainer') {
+        container.id = 'globalToastContainer';
+    }
+    if (container.parentElement !== document.body) {
+        document.body.appendChild(container);
+    }
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+    toast.innerHTML = `<span class="toast-message">${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => { }, 10);
     setTimeout(() => {

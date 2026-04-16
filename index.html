@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>选择题练习平台</title>
+    <title>MultiQuiz</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" onerror="window.xlsxLoadFailed=true"></script>
 </head>
@@ -53,15 +53,18 @@
             </nav>
             <div class="sidebar-footer">
                 <div class="sidebar-stats">
-                    <div class="sf-item">
-                        <span class="sf-num" id="sidebarSubjectCount">0</span>
-                        <span class="sf-label">学科</span>
+                    <div class="sidebar-stats-main">
+                        <div class="sf-item">
+                            <span class="sf-num" id="sidebarSubjectCount">0</span>
+                            <span class="sf-label">学科</span>
+                        </div>
+                        <div class="sf-divider"></div>
+                        <div class="sf-item">
+                            <span class="sf-num" id="sidebarTotalCount">0</span>
+                            <span class="sf-label">题目</span>
+                        </div>
                     </div>
-                    <div class="sf-divider"></div>
-                    <div class="sf-item">
-                        <span class="sf-num" id="sidebarTotalCount">0</span>
-                        <span class="sf-label">题目</span>
-                    </div>
+                    <div class="sidebar-credit">by xmqaq</div>
                 </div>
             </div>
         </aside>
@@ -78,7 +81,7 @@
                 </button>
                 <div class="mobile-topbar-text">
                     <div class="mobile-topbar-title" id="mobileTopbarTitle">题库中心</div>
-                    <div class="mobile-topbar-subtitle" id="mobileTopbarSubtitle">选择题练习平台</div>
+                    <div class="mobile-topbar-subtitle" id="mobileTopbarSubtitle">题库练习平台</div>
                 </div>
             </div>
 
@@ -91,8 +94,8 @@
                     </div>
                     <div class="header-actions subject-header-actions">
                         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreFromBackup(this)">
-                        <button class="btn btn-primary" onclick="switchTab('import')"><span>+</span> 导入新题库</button>
-                        <button class="btn btn-secondary" onclick="showSubjectActions()">管理操作</button>
+                        <button class="btn btn-secondary btn-utility" type="button" onclick="document.getElementById('restoreFileInput').click()">导入配置</button>
+                        <button class="btn btn-secondary btn-utility" onclick="showSubjectActions()">管理操作</button>
                     </div>
                 </div>
 
@@ -105,8 +108,8 @@
                     </button>
                     <button class="mobile-quick-action" type="button" onclick="document.getElementById('restoreFileInput').click()">
                         <span class="mobile-quick-text">
-                            <span class="mobile-quick-title">恢复配置</span>
-                            <span class="mobile-quick-desc">从备份文件恢复</span>
+                            <span class="mobile-quick-title">导入配置</span>
+                            <span class="mobile-quick-desc">从备份文件恢复题库与记录</span>
                         </span>
                     </button>
                     <button class="mobile-quick-action" type="button" onclick="switchTab('history')">
@@ -117,14 +120,14 @@
                     </button>
                 </div>
                 <div class="mobile-quick-footer">
-                    <button class="btn btn-secondary" type="button" onclick="showSubjectActions()">更多管理操作</button>
+                    <button class="btn btn-secondary btn-utility" type="button" onclick="showSubjectActions()">更多管理操作</button>
                 </div>
 
                 <div id="subjectCards" class="subject-grid">
                     <div class="empty-state" id="subjectEmptyState">
                         <div class="empty-icon">📚</div>
                         <div class="empty-title">还没有题库</div>
-                        <div class="empty-desc">点击「导入新题库」开始添加你的第一个学科题库</div>
+                        <div class="empty-desc">点击「导入题库」开始添加第一个学科题库，或通过「导入配置」快速恢复已有题库与练习记录</div>
                         <button class="btn btn-primary mt-16" onclick="switchTab('import')">导入题库</button>
                     </div>
                 </div>
@@ -135,7 +138,7 @@
                 <div class="page-header">
                     <div>
                         <h1 class="page-title">导入题库</h1>
-                        <p class="page-subtitle">支持 Excel (.xlsx/.xls) 和 JSON 格式</p>
+                        <p class="page-subtitle">填写学科名称并选择文件；首次导入建议先下载模板</p>
                     </div>
                 </div>
 
@@ -144,7 +147,6 @@
                         <!-- 学科名称输入 -->
                         <div class="form-card">
                             <div class="form-card-header">
-                                <span class="form-card-icon" aria-hidden="true">🏷️</span>
                                 <span class="form-card-title">学科信息</span>
                             </div>
                             <div class="form-field">
@@ -157,7 +159,6 @@
                         <!-- 文件选择 -->
                         <div class="form-card">
                             <div class="form-card-header">
-                                <span class="form-card-icon" aria-hidden="true">📁</span>
                                 <span class="form-card-title">选择题库文件</span>
                             </div>
                             <div class="form-field">
@@ -167,7 +168,7 @@
                                     <input type="text" id="fileInputDisplay" class="form-input" placeholder="未选择文件" readonly aria-describedby="fileInputHint">
                                     <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" aria-label="选择题库文件">选择文件</button>
                                 </div>
-                                <div class="form-hint" id="fileInputHint">支持 Excel (.xlsx, .xls) 和 JSON 配置文件</div>
+                                <div class="form-hint" id="fileInputHint">支持 Excel (.xlsx/.xls) 与 JSON 文件，不确定格式时可先下载模板</div>
                             </div>
                         </div>
 
@@ -179,24 +180,22 @@
 
                     <div class="import-side">
                         <div class="info-card">
-                            <div class="info-card-title">📊 Excel 格式要求</div>
+                            <div class="info-card-title">导入说明</div>
+                            <p class="info-card-desc">Excel 和 JSON 都可以导入。首次使用建议先下载模板，再按示例填写后导入。</p>
                             <ul class="info-list">
-                                <li>第一行为表头（自动跳过）</li>
-                                <li>第一列：题目内容</li>
-                                <li>第二列：选项 A</li>
-                                <li>第三列：选项 B</li>
-                                <li>第四列：选项 C</li>
-                                <li>第五列：选项 D</li>
-                                <li>第六列：正确答案（A/B/C/D）</li>
+                                <li>Excel：第一行为表头，列顺序固定为题目、选项 A 到选项 D、正确答案</li>
+                                <li>JSON：支持题目数组，或 <code>{ "questions": [...] }</code> 结构</li>
+                                <li>每道题都需包含 <code>question</code>、<code>optionA</code> 到 <code>optionD</code>、<code>answer</code></li>
+                                <li><code>answer</code> 仅支持 A / B / C / D，本平台导出的 JSON 也可直接重新导入</li>
                             </ul>
                         </div>
-                        <div class="info-card mt-16">
-                            <div class="info-card-title">⚙️ JSON 格式说明</div>
-                            <ul class="info-list">
-                                <li>支持本平台导出的 JSON 文件</li>
-                                <li>导入后自动验证数据格式</li>
-                                <li>推荐用于备份和快速恢复</li>
-                            </ul>
+                        <div class="info-card">
+                            <div class="info-card-title">模板下载</div>
+                            <p class="info-card-desc">不想手动对照字段时，直接下载模板填写后再导入会更稳。</p>
+                            <div class="import-template-actions">
+                                <button class="btn btn-secondary btn-utility" type="button" onclick="downloadExcelTemplate()">下载 Excel 模板</button>
+                                <button class="btn btn-secondary btn-utility" type="button" onclick="downloadJsonTemplate()">下载 JSON 模板</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -222,7 +221,7 @@
                                 <button class="btn btn-secondary browse-answer-mode-btn" id="browseAnswerModeBtn" type="button" onclick="toggleBrowseAnswerMode()">
                                     隐藏答案
                                 </button>
-                                <button class="btn btn-ghost" type="button" onclick="showBrowseActions()">更多操作</button>
+                                <button class="btn btn-ghost btn-utility" type="button" onclick="showBrowseActions()">更多操作</button>
                             </div>
                         </div>
                         <button class="browse-mobile-toggle" id="browseMobileFilterToggle" type="button" onclick="toggleMobileBrowseFilters()" aria-expanded="false" aria-controls="browseFilterGrid">
@@ -256,13 +255,12 @@
                             </label>
                         </div>
                         <div class="browse-search-wrap">
-                            <label class="browse-label" for="searchInput">关键词</label>
+                            <label class="browse-label" for="searchInput">搜索</label>
                             <div class="browse-search-row browse-search-row-simple">
                                 <div class="search-wrap">
-                                    <input type="text" id="searchInput" class="search-input" placeholder="输入关键词后自动筛选题目...">
+                                    <input type="text" id="searchInput" class="search-input" placeholder="搜索题干或选项内容...">
                                 </div>
                             </div>
-                            <p class="browse-search-hint">支持按题干和选项内容实时筛选</p>
                         </div>
                     </div>
                 </div>
@@ -419,7 +417,7 @@
                         <select id="wrongSubjectFilter" class="select-control" onchange="filterWrongQuestions()">
                             <option value="all">全部学科</option>
                         </select>
-                        <button class="btn btn-primary" onclick="startWrongQuestionsPractice()">🔄 错题练习</button>
+                        <button class="btn btn-primary" onclick="startWrongQuestionsPractice()">错题练习</button>
                         <button class="btn btn-danger" onclick="clearWrongQuestions()">清空错题</button>
                     </div>
                 </div>
@@ -440,8 +438,8 @@
                         <p class="page-subtitle">历次模拟考试成绩</p>
                     </div>
                     <div class="header-actions history-header-actions">
-                        <button class="btn btn-secondary" onclick="exportHistory()">📤 导出记录</button>
-                        <button class="btn btn-danger" onclick="clearHistory()">🗑️ 清空记录</button>
+                        <button class="btn btn-secondary" onclick="exportHistory()">导出记录</button>
+                        <button class="btn btn-danger" onclick="clearHistory()">清空记录</button>
                     </div>
                 </div>
                 <div id="historyList" class="history-list">
@@ -575,7 +573,7 @@
                     <path d="M4.5 6.5h11M4.5 10h11M4.5 13.5h7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
             </span>
-            <span class="mobile-nav-label">题库</span>
+            <span class="mobile-nav-label">题库中心</span>
         </button>
         <button class="mobile-nav-item" data-tab="browse" onclick="switchTab('browse')">
             <span class="mobile-nav-icon" aria-hidden="true">
@@ -584,7 +582,7 @@
                     <path d="M12.5 7.5l3-3m0 0h-2.4m2.4 0v2.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </span>
-            <span class="mobile-nav-label">浏览</span>
+            <span class="mobile-nav-label">题目浏览</span>
         </button>
         <button class="mobile-nav-item" data-tab="exam" onclick="switchTab('exam')">
             <span class="mobile-nav-icon" aria-hidden="true">
@@ -593,7 +591,7 @@
                     <path d="M8 11h4M8 14h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
             </span>
-            <span class="mobile-nav-label">答题</span>
+            <span class="mobile-nav-label">模拟答题</span>
         </button>
         <button class="mobile-nav-item" data-tab="wrong" onclick="switchTab('wrong')">
             <span class="mobile-nav-icon" aria-hidden="true">
@@ -602,7 +600,7 @@
                     <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.8"/>
                 </svg>
             </span>
-            <span class="mobile-nav-label">错题</span>
+            <span class="mobile-nav-label">错题本</span>
         </button>
         <button class="mobile-nav-item" data-tab="history" onclick="switchTab('history')">
             <span class="mobile-nav-icon" aria-hidden="true">
@@ -611,7 +609,7 @@
                     <path d="M5.5 4.5h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
                 </svg>
             </span>
-            <span class="mobile-nav-label">记录</span>
+            <span class="mobile-nav-label">考试记录</span>
         </button>
     </nav>
 
