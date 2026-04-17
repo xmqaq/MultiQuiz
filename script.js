@@ -255,6 +255,55 @@ function resetExamStateAfterLibraryChange() {
     return hadRuntimeExam || hadSavedExam;
 }
 
+function clearSubjectAssociatedData(subject) {
+    if (!subject) {
+        return {
+            removedWrongCount: 0,
+            removedHistoryCount: 0,
+            hadExamSession: resetExamStateAfterLibraryChange()
+        };
+    }
+
+    const subjectId = subject.id;
+    const subjectQuestionIds = new Set(subject.questions.map(q => String(q.id)));
+
+    const subjectExamRecords = examHistory.filter(r => r.subjectId === subjectId);
+    let subjectPracticed = 0;
+    let subjectCorrect = 0;
+    subjectExamRecords.forEach(r => {
+        subjectPracticed += r.totalQuestions;
+        subjectCorrect += r.correct;
+    });
+    practiceStats.practiced = Math.max(0, practiceStats.practiced - subjectPracticed);
+    practiceStats.correct = Math.max(0, practiceStats.correct - subjectCorrect);
+
+    const removedWrongCount = wrongQuestions.filter(q => q.subjectId === subjectId).length;
+    wrongQuestions = wrongQuestions.filter(q => q.subjectId !== subjectId);
+    examHistory = examHistory.filter(r => r.subjectId !== subjectId);
+
+    for (const qid of Object.keys(questionTags)) {
+        if (subjectQuestionIds.has(qid)) {
+            delete questionTags[qid];
+        }
+    }
+
+    favoriteSet.forEach(id => {
+        if (subjectQuestionIds.has(id)) favoriteSet.delete(id);
+    });
+
+    safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
+    safeSetItem('practiceStats', JSON.stringify(practiceStats));
+    safeSetItem('examHistory', JSON.stringify(examHistory));
+    safeSetItem('questionTags', JSON.stringify(questionTags));
+    saveFavorites();
+
+    return {
+        removedWrongCount,
+        removedHistoryCount: subjectExamRecords.length,
+        hadExamSession: resetExamStateAfterLibraryChange()
+    };
+}
+
 function saveFavorites() {
     favoriteQuestionIds = [...favoriteSet];
     safeSetItem('favoriteQuestionIds', JSON.stringify(favoriteQuestionIds));
@@ -756,38 +805,11 @@ function deleteSubject(subjectId) {
             label: '确认删除',
             danger: true,
             action: () => {
-                const subjectQuestionIds = new Set(subject.questions.map(q => String(q.id)));
-
-                // 扣减该学科在 practiceStats 中的贡献
-                const subjectExamRecords = examHistory.filter(r => r.subjectId === subjectId);
-                let subjectPracticed = 0, subjectCorrect = 0;
-                subjectExamRecords.forEach(r => {
-                    subjectPracticed += r.totalQuestions;
-                    subjectCorrect += r.correct;
-                });
-                practiceStats.practiced = Math.max(0, practiceStats.practiced - subjectPracticed);
-                practiceStats.correct = Math.max(0, practiceStats.correct - subjectCorrect);
-                safeSetItem('practiceStats', JSON.stringify(practiceStats));
-
+                const cleanup = clearSubjectAssociatedData(subject);
                 subjects = subjects.filter(s => s.id !== subjectId);
-                wrongQuestions = wrongQuestions.filter(q => q.subjectId !== subjectId);
-                examHistory = examHistory.filter(r => r.subjectId !== subjectId);
-                for (const qid of Object.keys(questionTags)) {
-                    if (subjectQuestionIds.has(qid)) {
-                        delete questionTags[qid];
-                    }
-                }
-                favoriteSet.forEach(id => {
-                    if (subjectQuestionIds.has(id)) favoriteSet.delete(id);
-                });
                 saveSubjects();
-                safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
-                safeSetItem('examHistory', JSON.stringify(examHistory));
-                safeSetItem('questionTags', JSON.stringify(questionTags));
-                saveFavorites();
-                const hadExamSession = resetExamStateAfterLibraryChange();
                 renderAll();
-                showToast(`已删除「${subject.name}」题库${hadExamSession ? '，并清除了未完成考试缓存' : ''}`, 'success');
+                showToast(`已删除「${subject.name}」题库${cleanup.hadExamSession ? '，并清除了未完成考试缓存' : ''}`, 'success');
             }
         },
         { label: '取消', ghost: true, action: () => {} }
@@ -1044,9 +1066,17 @@ function importQuestions(newQuestions, subjectName) {
                     afterImport(subjectName, newQuestions.length, existing.questions.length);
                 }},
                 { label: `覆盖题库（替换为 ${newQuestions.length} 题）`, action: () => {
+                    const cleanup = clearSubjectAssociatedData(existing);
                     existing.questions = newQuestions;
                     saveSubjects();
-                    afterImport(subjectName, newQuestions.length, newQuestions.length);
+                    afterImport(
+                        subjectName,
+                        newQuestions.length,
+                        newQuestions.length,
+                        cleanup.hadExamSession
+                            ? '已覆盖旧题库，并清除了旧题关联数据及未完成考试缓存'
+                            : '已覆盖旧题库，并清除了旧题关联数据'
+                    );
                 }},
                 { label: '取消', danger: false, ghost: true, action: () => {} }
             ]
@@ -1058,12 +1088,12 @@ function importQuestions(newQuestions, subjectName) {
     }
 }
 
-function afterImport(subjectName, added, total) {
+function afterImport(subjectName, added, total, successMessage) {
     renderAll();
     document.getElementById('subjectName').value = '';
     document.getElementById('fileInput').value = '';
     document.getElementById('fileInputDisplay').value = '未选择文件';
-    showToast(`成功导入 ${added} 道题目到「${subjectName}」，共 ${total} 题`, 'success');
+    showToast(successMessage || `成功导入 ${added} 道题目到「${subjectName}」，共 ${total} 题`, 'success');
     switchTab('subjects');
 }
 
