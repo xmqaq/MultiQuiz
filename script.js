@@ -2336,6 +2336,7 @@ function startWrongQuestionsPractice() {
     };
 
     updateExamInteractionState();
+    saveExamSession();
     switchTab('exam');
     setTimeout(() => {
         document.getElementById('examSetup').style.display = 'none';
