@@ -249,6 +249,7 @@ function resetExamStateAfterLibraryChange() {
         timer.textContent = '60:00';
     }
 
+    updateExamInteractionState();
     updateExamSubjectSelect();
     onExamSubjectChange();
     return hadRuntimeExam || hadSavedExam;
@@ -527,6 +528,27 @@ function closeAnswerCardOnMobile(updateToggle = true) {
     }
 
     if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+}
+
+function isExamCompleted() {
+    return currentExam?.completed === true;
+}
+
+function updateExamInteractionState() {
+    const panel = document.getElementById('answerCardPanel');
+    const toggleBtn = document.getElementById('answerCardToggleBtn');
+    const completed = isExamCompleted();
+
+    if (completed) {
+        if (panel) panel.style.display = 'none';
+        document.body.classList.remove('answer-card-open');
+    }
+
+    if (toggleBtn) {
+        toggleBtn.style.display = completed ? 'none' : '';
+        toggleBtn.disabled = completed;
+        toggleBtn.setAttribute('aria-expanded', 'false');
+    }
 }
 
 function isExamInProgress() {
@@ -1788,6 +1810,7 @@ function startExam() {
         endTime: Date.now() + examTime * 60 * 1000
     };
 
+    updateExamInteractionState();
     saveExamSession();
 
     document.getElementById('examSetup').style.display = 'none';
@@ -1934,7 +1957,7 @@ function showQuestion() {
 function toggleAnswerCard(forceOpen) {
     const panel = document.getElementById('answerCardPanel');
     const toggleBtn = document.getElementById('answerCardToggleBtn');
-    if (!panel) return;
+    if (!panel || isExamCompleted()) return;
 
     const isHidden = panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
     const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : isHidden;
@@ -1969,6 +1992,7 @@ function updateAnswerCard() {
 }
 
 function jumpToQuestion(index) {
+    if (isExamCompleted()) return;
     if (index >= 0 && index < currentExam.questions.length) {
         currentExam.currentIndex = index;
         showQuestion();
@@ -1978,15 +2002,19 @@ function jumpToQuestion(index) {
 }
 
 function prevQuestion() {
+    if (isExamCompleted()) return;
     if (currentExam.currentIndex > 0) { currentExam.currentIndex--; showQuestion(); saveExamSession(); }
 }
 function nextQuestion() {
+    if (isExamCompleted()) return;
     if (currentExam.currentIndex < currentExam.questions.length - 1) { currentExam.currentIndex++; showQuestion(); saveExamSession(); }
 }
 
 function submitExam() {
     if (currentExam.timer) clearTimeout(currentExam.timer);
     closeAnswerCardOnMobile(false);
+    currentExam.completed = true;
+    updateExamInteractionState();
     clearExamSession();
     const newWrong = [];
     const corrected = [];
@@ -2107,6 +2135,8 @@ function submitExam() {
 function restartExam() {
     closeAnswerCardOnMobile(false);
     clearExamSession();
+    currentExam = {};
+    updateExamInteractionState();
     document.getElementById('examSetup').style.display = 'block';
     document.getElementById('examContent').style.display = 'none';
     document.querySelector('.exam-nav').style.display = 'flex';
@@ -2179,9 +2209,11 @@ function restoreExamSession() {
                         ...session,
                         timer: null,
                         startTime: new Date(session.startTime),
-                        effectiveStart: new Date()
+                        effectiveStart: new Date(),
+                        completed: false
                     };
                     closeAnswerCardOnMobile(false);
+                    updateExamInteractionState();
                     switchTab('exam');
                     document.getElementById('examSetup').style.display = 'none';
                     document.getElementById('examContent').style.display = 'block';
@@ -2303,6 +2335,7 @@ function startWrongQuestionsPractice() {
         isWrongPractice: true
     };
 
+    updateExamInteractionState();
     switchTab('exam');
     setTimeout(() => {
         document.getElementById('examSetup').style.display = 'none';
@@ -2414,6 +2447,7 @@ function retakeExam(recordId) {
         subjectName: r.subjectName,
         isWrongPractice: false
     };
+    updateExamInteractionState();
     switchTab('exam');
     setTimeout(() => {
         document.getElementById('examSetup').style.display = 'none';
@@ -2997,7 +3031,7 @@ function showToast(message, type = 'info') {
 // 键盘快捷键
 // =============================================
 document.addEventListener('keydown', e => {
-    if (document.getElementById('examContent')?.style.display !== 'none') {
+    if (isExamInProgress()) {
         if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); }
         else if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(); }
         else if (!e.ctrlKey && !e.metaKey) {
