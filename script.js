@@ -291,6 +291,7 @@ function clearSubjectAssociatedData(subject) {
         if (subjectQuestionIds.has(id)) favoriteSet.delete(id);
     });
 
+    normalizePracticeStatsIfNoTrackedData();
     safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
     safeSetItem('practiceStats', JSON.stringify(practiceStats));
     safeSetItem('examHistory', JSON.stringify(examHistory));
@@ -2322,9 +2323,10 @@ function clearWrongQuestions() {
             danger: true,
             action: () => {
                 wrongQuestions = [];
+                normalizePracticeStatsIfNoTrackedData();
                 safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
                 displayWrongQuestions();
-                updateStats();
+                refreshStatsViews();
                 showToast('错题本已清空', 'success');
             }
         },
@@ -2508,6 +2510,29 @@ function rollbackPracticeStatsByRecords(records) {
     safeSetItem('practiceStats', JSON.stringify(practiceStats));
 }
 
+function normalizePracticeStatsIfNoTrackedData() {
+    if (examHistory.length > 0 || wrongQuestions.length > 0) return false;
+
+    const practiced = Number(practiceStats?.practiced) || 0;
+    const correct = Number(practiceStats?.correct) || 0;
+    const total = Number(practiceStats?.total) || 0;
+    if (practiced === 0 && correct === 0 && total === 0) return false;
+
+    practiceStats = { total: 0, correct: 0, practiced: 0 };
+    safeSetItem('practiceStats', JSON.stringify(practiceStats));
+    return true;
+}
+
+function refreshStatsViews() {
+    updateStats();
+    if (!document.getElementById('page-stats')?.classList.contains('active')) return;
+
+    requestAnimationFrame(() => {
+        renderSubjectDist();
+        requestAnimationFrame(() => drawPracticeChart(currentChartPeriod));
+    });
+}
+
 function deleteExamRecord(recordId) {
     showConfirmWithOptions('确定删除这条考试记录？', [
         {
@@ -2518,9 +2543,10 @@ function deleteExamRecord(recordId) {
                 if (removedRecords.length === 0) return;
                 rollbackPracticeStatsByRecords(removedRecords);
                 examHistory = examHistory.filter(r => r.id !== recordId);
+                normalizePracticeStatsIfNoTrackedData();
                 safeSetItem('examHistory', JSON.stringify(examHistory));
                 showExamHistory();
-                updateStats();
+                refreshStatsViews();
                 showToast('记录已删除，统计已同步更新', 'success');
             }
         },
@@ -2543,9 +2569,10 @@ function clearHistory() {
             action: () => {
                 rollbackPracticeStatsByRecords(examHistory);
                 examHistory = [];
+                normalizePracticeStatsIfNoTrackedData();
                 safeSetItem('examHistory', JSON.stringify(examHistory));
                 showExamHistory();
-                updateStats();
+                refreshStatsViews();
                 showToast('考试记录已清空，统计已同步更新', 'success');
             }
         },
@@ -2557,6 +2584,7 @@ function clearHistory() {
 // 统计分析
 // =============================================
 function updateStats() {
+    normalizePracticeStatsIfNoTrackedData();
     const total = subjects.reduce((n, s) => n + s.questions.length, 0);
     document.getElementById('totalQuestionsCount').textContent = total;
     document.getElementById('practicedCount').textContent = practiceStats.practiced || 0;
