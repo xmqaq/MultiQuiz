@@ -140,19 +140,7 @@ function loadData() {
     if (!Array.isArray(favoriteQuestionIds)) favoriteQuestionIds = [];
     favoriteSet = new Set(favoriteQuestionIds.map(id => String(id)));
 
-    // 修复重复 id：遍历所有题目，发现重复 id 则重新生成
-    const seenIds = new Set();
-    let hasDuplicate = false;
-    subjects.forEach(s => {
-        s.questions.forEach(q => {
-            if (!q.id || seenIds.has(q.id)) {
-                q.id = genId();
-                hasDuplicate = true;
-            }
-            seenIds.add(q.id);
-        });
-    });
-    if (hasDuplicate) saveSubjects();
+    repairStoredQuestionReferencesAfterIdFix();
     cleanupOrphanFavorites();
 }
 
@@ -180,6 +168,10 @@ function normalizeQuestionContent(text) {
     return String(text || '').replace(/\s+/g, ' ').trim();
 }
 
+function getQuestionAnswerValue(question) {
+    return question?.answer ?? question?.correctAnswer ?? '';
+}
+
 function buildQuestionContentKey(question) {
     return [
         normalizeQuestionContent(question.question),
@@ -187,8 +179,146 @@ function buildQuestionContentKey(question) {
         normalizeQuestionContent(question.optionB),
         normalizeQuestionContent(question.optionC),
         normalizeQuestionContent(question.optionD),
-        normalizeQuestionContent(question.answer).toUpperCase()
+        normalizeQuestionContent(getQuestionAnswerValue(question)).toUpperCase()
     ].join('||');
+}
+
+function normalizeImportedQuestion(rawQuestion) {
+    const answer = (getQuestionAnswerValue(rawQuestion) || '').toString().toUpperCase().trim();
+    const normalized = {
+        id: genId(),
+        question: String(rawQuestion?.question ?? '').trim(),
+        optionA: String(rawQuestion?.optionA ?? '').trim(),
+        optionB: String(rawQuestion?.optionB ?? '').trim(),
+        optionC: String(rawQuestion?.optionC ?? '').trim(),
+        optionD: String(rawQuestion?.optionD ?? '').trim(),
+        answer
+    };
+
+    const isValid = Boolean(
+        normalized.question &&
+        normalized.optionA &&
+        normalized.optionB &&
+        normalized.optionC &&
+        normalized.optionD &&
+        ['A', 'B', 'C', 'D'].includes(answer)
+    );
+
+    return isValid ? normalized : null;
+}
+
+function mergeQuestionTags(targetTags, questionId, tags) {
+    const targetId = questionIdKey(questionId);
+    const mergedTags = new Set(targetTags[targetId] || []);
+    (tags || []).forEach(tag => {
+        if (tag) mergedTags.add(tag);
+    });
+    if (mergedTags.size > 0) targetTags[targetId] = [...mergedTags];
+}
+
+function repairStoredQuestionReferencesAfterIdFix() {
+    const seenIds = new Set();
+    const remappedQuestions = [];
+
+    subjects.forEach(subject => {
+        subject.questions.forEach(question => {
+            const currentId = questionIdKey(question.id);
+            if (!question.id || seenIds.has(currentId)) {
+                const newId = questionIdKey(genId());
+                remappedQuestions.push({
+                    oldId: currentId,
+                    newId,
+                    subjectId: subject.id,
+                    contentKey: buildQuestionContentKey(question)
+                });
+                question.id = newId;
+                seenIds.add(newId);
+                return;
+            }
+            seenIds.add(currentId);
+        });
+    });
+
+    if (remappedQuestions.length === 0) return false;
+
+    const validQuestionIds = new Set();
+    const questionIdBySubjectAndContent = new Map();
+    subjects.forEach(subject => {
+        subject.questions.forEach(question => {
+            const questionId = questionIdKey(question.id);
+            validQuestionIds.add(questionId);
+            questionIdBySubjectAndContent.set(`${subject.id}::${buildQuestionContentKey(question)}`, questionId);
+        });
+    });
+
+    const remappedTargetsByOldId = new Map();
+    remappedQuestions.forEach(({ oldId, newId }) => {
+        const key = questionIdKey(oldId);
+        if (!remappedTargetsByOldId.has(key)) remappedTargetsByOldId.set(key, new Set());
+        remappedTargetsByOldId.get(key).add(questionIdKey(newId));
+    });
+
+    const getRepairTargets = oldId => {
+        const key = questionIdKey(oldId);
+        const targets = new Set(remappedTargetsByOldId.get(key) || []);
+        if (validQuestionIds.has(key)) targets.add(key);
+        return targets;
+    };
+
+    const nextQuestionTags = {};
+    Object.entries(questionTags || {}).forEach(([questionId, tags]) => {
+        const targets = getRepairTargets(questionId);
+        if (targets.size === 0) return;
+        targets.forEach(targetId => mergeQuestionTags(nextQuestionTags, targetId, tags));
+    });
+    questionTags = nextQuestionTags;
+
+    const nextFavorites = new Set();
+    favoriteSet.forEach(questionId => {
+        const targets = getRepairTargets(questionId);
+        targets.forEach(targetId => nextFavorites.add(targetId));
+    });
+    favoriteSet = nextFavorites;
+
+    const latestWrongByQuestion = new Map();
+    wrongQuestions.forEach(record => {
+        const contentKey = buildQuestionContentKey(record);
+        const exactId = questionIdBySubjectAndContent.get(`${record.subjectId}::${contentKey}`);
+        const fallbackId = validQuestionIds.has(questionIdKey(record.id)) ? questionIdKey(record.id) : [...getRepairTargets(record.id)][0];
+        const nextId = exactId || fallbackId;
+        if (!nextId) return;
+
+        const normalizedRecord = { ...record, id: nextId };
+        const prev = latestWrongByQuestion.get(nextId);
+        const prevTime = prev ? new Date(prev.timestamp || 0).getTime() : -Infinity;
+        const currTime = new Date(normalizedRecord.timestamp || 0).getTime();
+        if (!prev || currTime >= prevTime) {
+            latestWrongByQuestion.set(nextId, normalizedRecord);
+        }
+    });
+    wrongQuestions = [...latestWrongByQuestion.values()];
+
+    examHistory = examHistory.map(record => ({
+        ...record,
+        questions: Array.isArray(record.questions)
+            ? record.questions
+                .map(question => {
+                    const contentKey = buildQuestionContentKey(question);
+                    const exactId = questionIdBySubjectAndContent.get(`${record.subjectId}::${contentKey}`);
+                    const fallbackId = validQuestionIds.has(questionIdKey(question.id)) ? questionIdKey(question.id) : [...getRepairTargets(question.id)][0];
+                    const nextId = exactId || fallbackId;
+                    return nextId ? { ...question, id: nextId } : null;
+                })
+                .filter(Boolean)
+            : record.questions
+    }));
+
+    saveSubjects();
+    safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
+    safeSetItem('examHistory', JSON.stringify(examHistory));
+    safeSetItem('questionTags', JSON.stringify(questionTags));
+    saveFavorites();
+    return true;
 }
 
 function collectLibraryDedupData() {
@@ -693,7 +823,7 @@ function renderSubjectCards() {
         const total = subject.questions.length;
         const favoriteCount = subject.questions.filter(q => favoriteSet.has(questionIdKey(q.id))).length;
         const card = document.createElement('div');
-        card.className = 'subject-card';
+        card.className = `subject-card${wrongCount > 0 ? ' subject-card--attention' : ''}`;
         card.innerHTML = `
             <div class="subject-card-top">
                 <div class="subject-card-name">${escapeHtml(subject.name)}</div>
@@ -702,16 +832,16 @@ function renderSubjectCards() {
                 </div>
             </div>
             <div class="subject-card-stats">
-                <div class="sc-stat">
+                <div class="sc-stat sc-stat--total">
                     <div class="sc-stat-num">${total}</div>
                     <div class="sc-stat-label">题目</div>
                 </div>
-                <div class="sc-stat">
-                    <div class="sc-stat-num sc-stat-num--wrong">${wrongCount}</div>
+                <div class="sc-stat sc-stat--wrong${wrongCount > 0 ? ' sc-stat--active' : ''}">
+                    <div class="sc-stat-num${wrongCount > 0 ? ' sc-stat-num--wrong' : ''}">${wrongCount}</div>
                     <div class="sc-stat-label">错题</div>
                 </div>
-                <div class="sc-stat">
-                    <div class="sc-stat-num sc-stat-num--favorite">${favoriteCount}</div>
+                <div class="sc-stat sc-stat--favorite${favoriteCount > 0 ? ' sc-stat--active' : ''}">
+                    <div class="sc-stat-num${favoriteCount > 0 ? ' sc-stat-num--favorite' : ''}">${favoriteCount}</div>
                     <div class="sc-stat-label">收藏</div>
                 </div>
             </div>
@@ -1009,17 +1139,16 @@ function parseExcelRows(rows) {
     for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
         if (row.length >= 6 && row[0]) {
-            const answer = (row[5] || '').toString().toUpperCase().trim();
-            if (['A', 'B', 'C', 'D'].includes(answer)) {
-                result.push({
-                    id: genId(),
-                    question: String(row[0] || ''),
-                    optionA: String(row[1] || ''),
-                    optionB: String(row[2] || ''),
-                    optionC: String(row[3] || ''),
-                    optionD: String(row[4] || ''),
-                    answer
-                });
+            const normalized = normalizeImportedQuestion({
+                question: row[0],
+                optionA: row[1],
+                optionB: row[2],
+                optionC: row[3],
+                optionD: row[4],
+                answer: row[5]
+            });
+            if (normalized) {
+                result.push(normalized);
             }
         }
     }
@@ -1034,18 +1163,9 @@ function parseJson(file, subjectName) {
         try {
             const config = JSON.parse(e.target.result);
             let rawQuestions = Array.isArray(config) ? config : (config.questions || []);
-            const valid = rawQuestions.filter(q =>
-                q.question && q.optionA && q.optionB && q.optionC && q.optionD &&
-                ['A', 'B', 'C', 'D'].includes((q.answer || '').toString().toUpperCase())
-            ).map(q => ({
-                id: genId(),
-                question: String(q.question),
-                optionA: String(q.optionA),
-                optionB: String(q.optionB),
-                optionC: String(q.optionC),
-                optionD: String(q.optionD),
-                answer: q.answer.toString().toUpperCase().trim()
-            }));
+            const valid = rawQuestions
+                .map(q => normalizeImportedQuestion(q))
+                .filter(Boolean);
             if (valid.length === 0) { showToast('未找到格式正确的题目', 'error'); return; }
             importQuestions(valid, subjectName);
         } catch (err) {
@@ -1287,7 +1407,7 @@ function updateTagFilterBar() {
     bar.innerHTML = `
         <span style="font-size:12px;color:var(--text-muted)">标签筛选：</span>
         ${[...usedTags].map(tag => `
-            <button class="tag-chip ${curTag === tag ? 'active' : ''}" onclick='filterByTag(${JSON.stringify(tag)}, event)'>${tag}</button>
+            <button class="tag-chip ${curTag === tag ? 'active' : ''}" onclick='filterByTag(${JSON.stringify(tag)}, event)'>${escapeHtml(tag)}</button>
         `).join('')}
         <button class="tag-chip" onclick="filterByTag('', event)">清除</button>
     `;
@@ -1319,7 +1439,7 @@ function showTagEditor(questionId) {
                 ${availableTags.map(tag => `
                     <button class="tag-editor-item ${currentTags.includes(tag) ? 'active' : ''}"
                             onclick='toggleQuestionTag(${JSON.stringify(questionId)}, ${JSON.stringify(tag)}, event)'>
-                        ${currentTags.includes(tag) ? '✓ ' : ''}${tag}
+                        ${currentTags.includes(tag) ? '✓ ' : ''}${escapeHtml(tag)}
                     </button>
                 `).join('')}
             </div>
@@ -1551,7 +1671,7 @@ function exportAsPDF() {
             <h1>题库导出 (${pool.length}题)</h1>
             ${pool.map((q, i) => `
                 <div class="question">
-                    <div class="q-title">${i + 1}. ${escapeHtml(q.question)}<span class="subject-tag">[${q._subjectName || ''}]</span></div>
+                    <div class="q-title">${i + 1}. ${escapeHtml(q.question)}<span class="subject-tag">[${escapeHtml(q._subjectName || '')}]</span></div>
                     <div class="q-option">A. ${escapeHtml(q.optionA)}</div>
                     <div class="q-option">B. ${escapeHtml(q.optionB)}</div>
                     <div class="q-option">C. ${escapeHtml(q.optionC)}</div>
@@ -2240,7 +2360,7 @@ function restoreExamSession() {
                         ...session,
                         timer: null,
                         startTime: new Date(session.startTime),
-                        effectiveStart: new Date(),
+                        effectiveStart: new Date(session.effectiveStart || session.startTime),
                         completed: false
                     };
                     closeAnswerCardOnMobile(false);
@@ -2279,11 +2399,11 @@ function displayWrongQuestions(filterSubjectId) {
 
     desc.textContent = `共 ${wrongQuestions.length} 道错题`;
     if (wrongQuestions.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">暂无错题</div><div class="empty-desc">完成模拟答题后，错题会自动记录在这里</div></div>`;
+        container.innerHTML = `<div class="empty-state empty-state--minimal"><div class="empty-title">暂无错题</div><div class="empty-desc">完成模拟答题后，错题会自动记录在这里</div></div>`;
         return;
     }
     if (pool.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">该学科暂无错题</div></div>`;
+        container.innerHTML = `<div class="empty-state empty-state--minimal"><div class="empty-title">该学科暂无错题</div></div>`;
         return;
     }
 
@@ -2291,7 +2411,7 @@ function displayWrongQuestions(filterSubjectId) {
         <div class="wrong-item">
             <div class="wrong-item-header">
                 <span class="wrong-num">${i + 1}</span>
-                <span class="subject-tag">${q.subjectName || ''}</span>
+                <span class="subject-tag">${escapeHtml(q.subjectName || '')}</span>
                 <span class="wrong-time">${new Date(q.timestamp).toLocaleString('zh-CN')}</span>
             </div>
             <div class="wrong-text">${escapeHtml(q.question)}</div>
@@ -2387,7 +2507,7 @@ function startWrongQuestionsPractice() {
 function showExamHistory() {
     const container = document.getElementById('historyList');
     if (examHistory.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">暂无考试记录</div></div>`;
+        container.innerHTML = `<div class="empty-state empty-state--minimal"><div class="empty-title">暂无考试记录</div><div class="empty-desc">完成一次模拟答题后，记录将显示在这里</div></div>`;
         return;
     }
     container.innerHTML = examHistory.map(r => {
@@ -2399,7 +2519,7 @@ function showExamHistory() {
                 <div class="history-score ${isPass?'pass':'fail'}">${r.score}分</div>
                 <div class="history-info-block">
                     <div class="history-item-top">
-                        <span class="history-subject-tag">${r.subjectName || '全部学科'}</span>
+                        <span class="history-subject-tag">${escapeHtml(r.subjectName || '全部学科')}</span>
                         <span class="history-date">${dateStr}</span>
                     </div>
                     <div class="history-stats">
@@ -2442,7 +2562,7 @@ function viewExamDetail(recordId) {
 
     showModal(`
         <div class="detail-header">
-            <h3 class="modal-title">考试详情 — ${r.subjectName || ''}</h3>
+            <h3 class="modal-title">考试详情 — ${escapeHtml(r.subjectName || '')}</h3>
             <button class="modal-close" onclick="closeModal()">×</button>
         </div>
         <div class="detail-summary">
@@ -3050,7 +3170,7 @@ function showConfirmWithOptions(message, options) {
         modalCallbacks[callbackId] = o.action;
         return `
             <button class="btn ${o.danger ? 'btn-danger' : (o.ghost ? 'btn-ghost' : 'btn-primary')}" onclick="executeModalCallback('${callbackId}')">
-                ${o.label}
+                ${escapeHtml(o.label)}
             </button>
         `;
     }).join('');
@@ -3077,7 +3197,10 @@ function showToast(message, type = 'info') {
     }
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span class="toast-message">${message}</span>`;
+    const text = document.createElement('span');
+    text.className = 'toast-message';
+    text.textContent = String(message);
+    toast.appendChild(text);
     container.appendChild(toast);
     setTimeout(() => { }, 10);
     setTimeout(() => {
