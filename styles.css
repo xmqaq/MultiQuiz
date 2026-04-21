@@ -3358,7 +3358,6 @@ body.sidebar-open .sidebar-overlay {
     .toolbar-right,
     .header-actions,
     .history-actions,
-    .subject-card-btns,
     .import-actions,
     .result-btns,
     .result-actions {
@@ -3367,7 +3366,6 @@ body.sidebar-open .sidebar-overlay {
 
     .header-actions,
     .history-actions,
-    .subject-card-btns,
     .import-actions,
     .result-btns,
     .result-actions {
@@ -3423,15 +3421,28 @@ body.sidebar-open .sidebar-overlay {
     }
 
     .subject-card-btns {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(96px, 0.9fr);
         gap: 8px;
         margin-top: 8px;
+        align-items: stretch;
+        width: 100%;
     }
 
     .subject-card-btns .btn,
-    .subject-card-btns .btn-ghost {
+    .subject-card-btns .btn-ghost,
+    .subject-card-btns .btn-primary {
         width: 100%;
+        min-width: 0;
         flex: none;
+    }
+
+    .subject-card-btns .btn {
+        min-height: 42px;
+    }
+
+    .subject-card-btns .btn-ghost {
+        padding-inline: 12px;
     }
 
     .search-wrap,
