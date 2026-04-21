@@ -4,12 +4,14 @@
 // wrongQuestions: [{ ...question, subjectId, subjectName, userAnswer, timestamp }]
 // practiceStats: { total, correct, practiced }
 // examHistory: [{ id, date, score, ... subjectId, subjectName }]
+// practiceLog: [{ id, sessionId, date, subjectId, subjectName, totalQuestions, correct, mode, sourceExamRecordId }]
 // =============================================
 
 let subjects = [];
 let wrongQuestions = [];
 let practiceStats = { total: 0, correct: 0, practiced: 0 };
 let examHistory = [];
+let practiceLog = [];
 let currentExam = {};
 let currentChartPeriod = '7';
 let modalCallbacks = {}; // 用于存储模态框回调
@@ -134,6 +136,7 @@ function loadData() {
     wrongQuestions = parseStorageJSON('wrongQuestions', []);
     practiceStats = parseStorageJSON('practiceStats', { total: 0, correct: 0, practiced: 0 });
     examHistory = parseStorageJSON('examHistory', []);
+    practiceLog = parseStorageJSON('practiceLog', []);
     questionTags = parseStorageJSON('questionTags', {});
     favoriteQuestionIds = parseStorageJSON('favoriteQuestionIds', []);
     browseAnswerMode = parseStorageJSON(BROWSE_ANSWER_MODE_KEY, 'show') === 'hide' ? 'hide' : 'show';
@@ -141,6 +144,7 @@ function loadData() {
     favoriteSet = new Set(favoriteQuestionIds.map(id => String(id)));
 
     repairStoredQuestionReferencesAfterIdFix();
+    ensurePracticeLogConsistency();
     cleanupOrphanFavorites();
 }
 
@@ -303,8 +307,9 @@ function repairStoredQuestionReferencesAfterIdFix() {
         questions: Array.isArray(record.questions)
             ? record.questions
                 .map(question => {
+                    const questionSubjectId = question.subjectId || record.subjectId;
                     const contentKey = buildQuestionContentKey(question);
-                    const exactId = questionIdBySubjectAndContent.get(`${record.subjectId}::${contentKey}`);
+                    const exactId = questionIdBySubjectAndContent.get(`${questionSubjectId}::${contentKey}`);
                     const fallbackId = validQuestionIds.has(questionIdKey(question.id)) ? questionIdKey(question.id) : [...getRepairTargets(question.id)][0];
                     const nextId = exactId || fallbackId;
                     return nextId ? { ...question, id: nextId } : null;
@@ -319,6 +324,159 @@ function repairStoredQuestionReferencesAfterIdFix() {
     safeSetItem('questionTags', JSON.stringify(questionTags));
     saveFavorites();
     return true;
+}
+
+function normalizePracticeLogEntry(entry) {
+    const totalQuestions = Number(entry?.totalQuestions) || 0;
+    if (totalQuestions <= 0) return null;
+
+    const parsedDate = new Date(entry?.date || Date.now());
+    const date = Number.isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString();
+    const correct = Math.max(0, Math.min(totalQuestions, Number(entry?.correct) || 0));
+    const mode = ['exam', 'wrong', 'legacy'].includes(entry?.mode) ? entry.mode : 'exam';
+
+    return {
+        id: String(entry?.id || genId()),
+        sessionId: String(entry?.sessionId || entry?.sourceExamRecordId || genId()),
+        date,
+        subjectId: entry?.subjectId ? String(entry.subjectId) : '',
+        subjectName: entry?.subjectName ? String(entry.subjectName) : '',
+        totalQuestions,
+        correct,
+        mode,
+        sourceExamRecordId: entry?.sourceExamRecordId ? String(entry.sourceExamRecordId) : ''
+    };
+}
+
+function buildPracticeLogEntriesFromExamRecord(record) {
+    if (!record) return [];
+
+    const sessionId = String(record.id || genId());
+    if (Array.isArray(record.questions) && record.questions.some(question => question?.subjectId)) {
+        const subjectSummary = new Map();
+        record.questions.forEach(question => {
+            const subjectId = question?.subjectId ? String(question.subjectId) : '';
+            const subjectName = question?.subjectName || '';
+            if (!subjectId) return;
+
+            if (!subjectSummary.has(subjectId)) {
+                subjectSummary.set(subjectId, {
+                    id: genId(),
+                    sessionId,
+                    date: record.date,
+                    subjectId,
+                    subjectName,
+                    totalQuestions: 0,
+                    correct: 0,
+                    mode: 'exam',
+                    sourceExamRecordId: sessionId
+                });
+            }
+
+            const summary = subjectSummary.get(subjectId);
+            summary.totalQuestions += 1;
+            if (question.userAnswer === question.correctAnswer) {
+                summary.correct += 1;
+            }
+        });
+        return [...subjectSummary.values()].map(normalizePracticeLogEntry).filter(Boolean);
+    }
+
+    const fallbackEntry = normalizePracticeLogEntry({
+        id: genId(),
+        sessionId,
+        date: record.date,
+        subjectId: record.subjectId,
+        subjectName: record.subjectName,
+        totalQuestions: Number(record.totalQuestions) || 0,
+        correct: Number(record.correct) || 0,
+        mode: 'exam',
+        sourceExamRecordId: sessionId
+    });
+    return fallbackEntry ? [fallbackEntry] : [];
+}
+
+function getPracticeLogSummary(records = practiceLog) {
+    return records.reduce((summary, record) => {
+        summary.practiced += Number(record?.totalQuestions) || 0;
+        summary.correct += Number(record?.correct) || 0;
+        return summary;
+    }, { practiced: 0, correct: 0 });
+}
+
+function getTrackedPracticeLogRecords(includeLegacy = false) {
+    return includeLegacy ? [...practiceLog] : practiceLog.filter(record => record.mode !== 'legacy');
+}
+
+function syncPracticeStatsFromPracticeLog() {
+    const summary = getPracticeLogSummary();
+    practiceStats = {
+        total: 0,
+        correct: summary.correct,
+        practiced: summary.practiced
+    };
+}
+
+function trimPracticeLog() {
+    const legacyRecords = practiceLog.filter(record => record.mode === 'legacy').slice(0, 1);
+    const trackedRecords = practiceLog
+        .filter(record => record.mode !== 'legacy')
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 1000);
+    practiceLog = [...legacyRecords, ...trackedRecords];
+}
+
+function persistPracticeTracking() {
+    practiceLog = (Array.isArray(practiceLog) ? practiceLog : [])
+        .map(normalizePracticeLogEntry)
+        .filter(Boolean);
+    trimPracticeLog();
+    syncPracticeStatsFromPracticeLog();
+    safeSetItem('practiceLog', JSON.stringify(practiceLog));
+    safeSetItem('practiceStats', JSON.stringify(practiceStats));
+}
+
+function ensurePracticeLogConsistency() {
+    practiceLog = Array.isArray(practiceLog)
+        ? practiceLog.map(normalizePracticeLogEntry).filter(Boolean)
+        : [];
+
+    if (practiceLog.length === 0) {
+        practiceLog = examHistory.flatMap(record => buildPracticeLogEntriesFromExamRecord(record));
+    }
+
+    persistPracticeTracking();
+}
+
+function buildPracticeLogEntriesFromQuestions(questions, answers, mode, sessionId, fallbackSubjectId, fallbackSubjectName, sourceExamRecordId = '') {
+    const subjectSummary = new Map();
+
+    questions.forEach(question => {
+        const subjectId = String(question?._subjectId || question?.subjectId || fallbackSubjectId || '');
+        const subjectName = String(question?._subjectName || question?.subjectName || fallbackSubjectName || '');
+        const key = `${subjectId}::${subjectName}`;
+        if (!subjectSummary.has(key)) {
+            subjectSummary.set(key, {
+                id: genId(),
+                sessionId,
+                date: new Date().toISOString(),
+                subjectId,
+                subjectName,
+                totalQuestions: 0,
+                correct: 0,
+                mode,
+                sourceExamRecordId
+            });
+        }
+
+        const summary = subjectSummary.get(key);
+        summary.totalQuestions += 1;
+        if ((answers || {})[question.id] === question.answer) {
+            summary.correct += 1;
+        }
+    });
+
+    return [...subjectSummary.values()].map(normalizePracticeLogEntry).filter(Boolean);
 }
 
 function collectLibraryDedupData() {
@@ -396,20 +554,15 @@ function clearSubjectAssociatedData(subject) {
 
     const subjectId = subject.id;
     const subjectQuestionIds = new Set(subject.questions.map(q => String(q.id)));
-
-    const subjectExamRecords = examHistory.filter(r => r.subjectId === subjectId);
-    let subjectPracticed = 0;
-    let subjectCorrect = 0;
-    subjectExamRecords.forEach(r => {
-        subjectPracticed += r.totalQuestions;
-        subjectCorrect += r.correct;
-    });
-    practiceStats.practiced = Math.max(0, practiceStats.practiced - subjectPracticed);
-    practiceStats.correct = Math.max(0, practiceStats.correct - subjectCorrect);
+    const subjectExamRecords = examHistory.filter(record =>
+        record.subjectId === subjectId ||
+        (Array.isArray(record.questions) && record.questions.some(question => (question.subjectId || record.subjectId) === subjectId))
+    );
 
     const removedWrongCount = wrongQuestions.filter(q => q.subjectId === subjectId).length;
     wrongQuestions = wrongQuestions.filter(q => q.subjectId !== subjectId);
-    examHistory = examHistory.filter(r => r.subjectId !== subjectId);
+    examHistory = examHistory.filter(record => !subjectExamRecords.includes(record));
+    practiceLog = practiceLog.filter(record => record.subjectId !== subjectId);
 
     for (const qid of Object.keys(questionTags)) {
         if (subjectQuestionIds.has(qid)) {
@@ -423,9 +576,9 @@ function clearSubjectAssociatedData(subject) {
 
     normalizePracticeStatsIfNoTrackedData();
     safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
-    safeSetItem('practiceStats', JSON.stringify(practiceStats));
     safeSetItem('examHistory', JSON.stringify(examHistory));
     safeSetItem('questionTags', JSON.stringify(questionTags));
+    persistPracticeTracking();
     saveFavorites();
 
     return {
@@ -920,10 +1073,25 @@ function renameSubject(subjectId) {
     if (exists) { showToast('该学科名称已存在', 'error'); return; }
     subject.name = trimmed;
     wrongQuestions.forEach(q => { if (q.subjectId === subjectId) q.subjectName = trimmed; });
-    examHistory.forEach(r => { if (r.subjectId === subjectId) r.subjectName = trimmed; });
+    examHistory.forEach(r => {
+        if (r.subjectId === subjectId) r.subjectName = trimmed;
+        if (Array.isArray(r.questions)) {
+            r.questions.forEach(question => {
+                if ((question.subjectId || r.subjectId) === subjectId) {
+                    question.subjectName = trimmed;
+                }
+            });
+        }
+    });
+    practiceLog.forEach(record => {
+        if (record.subjectId === subjectId) {
+            record.subjectName = trimmed;
+        }
+    });
     saveSubjects();
     safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
     safeSetItem('examHistory', JSON.stringify(examHistory));
+    persistPracticeTracking();
     renderAll();
     showToast(`学科已改名为「${trimmed}」`, 'success');
 }
@@ -944,7 +1112,7 @@ function deleteSubject(subjectId) {
             }
         },
         { label: '取消', ghost: true, action: () => {} }
-    ]);
+    ], true);
 }
 
 function exportSubject(subjectId) {
@@ -970,6 +1138,7 @@ function exportAllBackup() {
         wrongQuestions: wrongQuestions,
         practiceStats: practiceStats,
         examHistory: examHistory,
+        practiceLog: practiceLog,
         questionTags: questionTags,
         favoriteQuestionIds: [...favoriteSet]
     };
@@ -998,6 +1167,7 @@ function restoreFromBackup(fileInput) {
                         wrongQuestions = backup.wrongQuestions || [];
                         practiceStats = backup.practiceStats || { total: 0, correct: 0, practiced: 0 };
                         examHistory = backup.examHistory || [];
+                        practiceLog = backup.practiceLog || [];
                         questionTags = (backup.questionTags && typeof backup.questionTags === 'object' && !Array.isArray(backup.questionTags))
                             ? backup.questionTags
                             : {};
@@ -1005,9 +1175,9 @@ function restoreFromBackup(fileInput) {
                         favoriteSet = new Set(favoriteQuestionIds);
                         saveSubjects();
                         safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
-                        safeSetItem('practiceStats', JSON.stringify(practiceStats));
                         safeSetItem('examHistory', JSON.stringify(examHistory));
                         safeSetItem('questionTags', JSON.stringify(questionTags));
+                        ensurePracticeLogConsistency();
                         saveFavorites();
                         const hadExamSession = resetExamStateAfterLibraryChange();
                         renderAll();
@@ -1015,7 +1185,7 @@ function restoreFromBackup(fileInput) {
                     }
                 },
                 { label: '取消', ghost: true, action: () => {} }
-            ]);
+            ], true);
         } catch (err) {
             showToast('备份文件解析失败：' + err.message, 'error');
         }
@@ -1615,7 +1785,7 @@ function showExportOptions() {
         </div>
         <div class="modal-body">
             <p style="margin-bottom:16px;color:var(--text-secondary)">
-                ${subject ? `当前学科：${subject.name}` : '全部学科'}，共 ${questionCount} 道题目
+                ${subject ? `当前学科：${escapeHtml(subject.name)}` : '全部学科'}，共 ${questionCount} 道题目
             </p>
             <div style="display:flex;flex-direction:column;gap:10px">
                 <button class="btn btn-secondary" onclick="exportAsJSON()" style="justify-content:center">
@@ -1730,6 +1900,7 @@ function clearLibrary() {
                     subjects = [];
                     wrongQuestions = [];
                     examHistory = [];
+                    practiceLog = [];
                     questionTags = {};
                     favoriteSet = new Set();
                     practiceStats = { total: 0, correct: 0, practiced: 0 };
@@ -1737,7 +1908,7 @@ function clearLibrary() {
                     safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
                     safeSetItem('examHistory', JSON.stringify(examHistory));
                     safeSetItem('questionTags', JSON.stringify(questionTags));
-                    safeSetItem('practiceStats', JSON.stringify(practiceStats));
+                    persistPracticeTracking();
                     saveFavorites();
                     const hadExamSession = resetExamStateAfterLibraryChange();
                     renderAll();
@@ -1745,7 +1916,7 @@ function clearLibrary() {
                 }
             },
             { label: '取消', ghost: true, action: () => {} }
-        ]);
+        ], true);
     } else {
         deleteSubject(subjectFilter);
     }
@@ -1856,7 +2027,8 @@ function deduplicateLibrary() {
                 }
             },
             { label: '取消', ghost: true, action: () => {} }
-        ]
+        ],
+        true
     );
 }
 
@@ -2206,17 +2378,24 @@ function submitExam() {
     }
     safeSetItem('wrongQuestions', JSON.stringify(wrongQuestions));
 
-    practiceStats.practiced += currentExam.questions.length;
-    practiceStats.correct += correct;
-    safeSetItem('practiceStats', JSON.stringify(practiceStats));
-
     const score = Math.round(correct / currentExam.questions.length * 100);
     const duration = Math.round((new Date() - (currentExam.effectiveStart || currentExam.startTime)) / 1000 / 60);
+    const sessionId = genId();
+    const submittedAt = new Date().toISOString();
+    const practiceEntries = buildPracticeLogEntriesFromQuestions(
+        currentExam.questions,
+        currentExam.answers,
+        currentExam.isWrongPractice ? 'wrong' : 'exam',
+        sessionId,
+        currentExam.subjectId,
+        currentExam.subjectName,
+        currentExam.isWrongPractice ? '' : sessionId
+    ).map(entry => ({ ...entry, date: submittedAt }));
 
     if (!currentExam.isWrongPractice) {
         const record = {
-            id: Date.now().toString(),
-            date: new Date().toISOString(),
+            id: sessionId,
+            date: submittedAt,
             score, correct,
             totalQuestions: currentExam.questions.length,
             duration,
@@ -2228,6 +2407,8 @@ function submitExam() {
                 id: q.id,
                 question: q.question,
                 optionA: q.optionA, optionB: q.optionB, optionC: q.optionC, optionD: q.optionD,
+                subjectId: q._subjectId || q.subjectId || currentExam.subjectId,
+                subjectName: q._subjectName || q.subjectName || currentExam.subjectName,
                 correctAnswer: q.answer,
                 userAnswer: currentExam.answers[q.id] || '未作答'
             }))
@@ -2236,6 +2417,9 @@ function submitExam() {
         if (examHistory.length > 50) examHistory = examHistory.slice(0, 50);
         safeSetItem('examHistory', JSON.stringify(examHistory));
     }
+
+    practiceLog = [...practiceEntries, ...practiceLog];
+    persistPracticeTracking();
 
     updateStats();
     displayWrongQuestions();
@@ -2582,8 +2766,8 @@ function retakeExam(recordId) {
         question: q.question,
         optionA: q.optionA, optionB: q.optionB, optionC: q.optionC, optionD: q.optionD,
         answer: q.correctAnswer,
-        _subjectId: r.subjectId,
-        _subjectName: r.subjectName
+        _subjectId: q.subjectId || r.subjectId,
+        _subjectName: q.subjectName || r.subjectName
     }));
     const timeLimit = r.timeLimit || Math.max(30, Math.ceil(examQuestions.length / 30) * 30);
     closeAnswerCardOnMobile(false);
@@ -2614,24 +2798,8 @@ function retakeExam(recordId) {
     }, 50);
 }
 
-function rollbackPracticeStatsByRecords(records) {
-    if (!Array.isArray(records) || records.length === 0) return;
-
-    let practicedToRollback = 0;
-    let correctToRollback = 0;
-
-    records.forEach(record => {
-        practicedToRollback += Number(record?.totalQuestions) || 0;
-        correctToRollback += Number(record?.correct) || 0;
-    });
-
-    practiceStats.practiced = Math.max(0, (practiceStats.practiced || 0) - practicedToRollback);
-    practiceStats.correct = Math.max(0, (practiceStats.correct || 0) - correctToRollback);
-    safeSetItem('practiceStats', JSON.stringify(practiceStats));
-}
-
 function normalizePracticeStatsIfNoTrackedData() {
-    if (examHistory.length > 0 || wrongQuestions.length > 0) return false;
+    if (practiceLog.length > 0 || examHistory.length > 0 || wrongQuestions.length > 0) return false;
 
     const practiced = Number(practiceStats?.practiced) || 0;
     const correct = Number(practiceStats?.correct) || 0;
@@ -2659,12 +2827,13 @@ function deleteExamRecord(recordId) {
             label: '删除记录',
             danger: true,
             action: () => {
-                const removedRecords = examHistory.filter(r => r.id === recordId);
-                if (removedRecords.length === 0) return;
-                rollbackPracticeStatsByRecords(removedRecords);
+                const hadRecord = examHistory.some(r => r.id === recordId);
+                if (!hadRecord) return;
                 examHistory = examHistory.filter(r => r.id !== recordId);
+                practiceLog = practiceLog.filter(record => record.sourceExamRecordId !== recordId);
                 normalizePracticeStatsIfNoTrackedData();
                 safeSetItem('examHistory', JSON.stringify(examHistory));
+                persistPracticeTracking();
                 showExamHistory();
                 refreshStatsViews();
                 showToast('记录已删除，统计已同步更新', 'success');
@@ -2687,10 +2856,12 @@ function clearHistory() {
             label: '清空记录',
             danger: true,
             action: () => {
-                rollbackPracticeStatsByRecords(examHistory);
+                const removedIds = new Set(examHistory.map(record => record.id));
                 examHistory = [];
+                practiceLog = practiceLog.filter(record => !record.sourceExamRecordId || !removedIds.has(record.sourceExamRecordId));
                 normalizePracticeStatsIfNoTrackedData();
                 safeSetItem('examHistory', JSON.stringify(examHistory));
+                persistPracticeTracking();
                 showExamHistory();
                 refreshStatsViews();
                 showToast('考试记录已清空，统计已同步更新', 'success');
@@ -2704,6 +2875,7 @@ function clearHistory() {
 // 统计分析
 // =============================================
 function updateStats() {
+    syncPracticeStatsFromPracticeLog();
     normalizePracticeStatsIfNoTrackedData();
     const total = subjects.reduce((n, s) => n + s.questions.length, 0);
     document.getElementById('totalQuestionsCount').textContent = total;
@@ -2730,7 +2902,7 @@ function renderSubjectDist() {
         return `
             <div class="dist-item">
                 <div class="dist-name">
-                    <span class="dist-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i%colors.length]};margin-right:6px;flex-shrink:0;"></span>${s.name}
+                    <span class="dist-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i%colors.length]};margin-right:6px;flex-shrink:0;"></span>${escapeHtml(s.name)}
                 </div>
                 <div class="dist-bar-wrap">
                     <div class="dist-bar" style="width:${pct}%;background:${colors[i%colors.length]}"></div>
@@ -2759,9 +2931,9 @@ function renderHeatmap() {
 
     // 计算每日练习数量
     const dailyData = {};
-    examHistory.forEach(r => {
-        const d = new Date(r.date).toLocaleDateString('zh-CN');
-        dailyData[d] = (dailyData[d] || 0) + r.totalQuestions;
+    getTrackedPracticeLogRecords().forEach(record => {
+        const d = new Date(record.date).toLocaleDateString('zh-CN');
+        dailyData[d] = (dailyData[d] || 0) + record.totalQuestions;
     });
 
     // 生成热力图
@@ -2794,15 +2966,26 @@ function renderRadarChart() {
     const W = rect.width, H = rect.height;
     const cx = W / 2, cy = H / 2;
     const radius = Math.min(W, H) / 2 - 50;
+    const practiceBySubject = new Map();
+    getTrackedPracticeLogRecords().forEach(record => {
+        if (!record.subjectId) return;
+        if (!practiceBySubject.has(record.subjectId)) {
+            practiceBySubject.set(record.subjectId, { practiced: 0, correct: 0 });
+        }
+        const summary = practiceBySubject.get(record.subjectId);
+        summary.practiced += record.totalQuestions;
+        summary.correct += record.correct;
+    });
 
     // 计算每个学科的正确率
     const subjectAccuracy = subjects.map(s => {
-        const subjectWrong = wrongQuestions.filter(q => q.subjectId === s.id).length;
-        const practiced = practiceStats.practiced || 1;
-        // 简化计算：基于错题数估算
-        const accuracy = Math.max(0, Math.min(100, 100 - (subjectWrong / Math.max(s.questions.length, 1)) * 100));
-        return { name: s.name, accuracy: Math.round(accuracy) };
-    });
+        const summary = practiceBySubject.get(s.id);
+        if (!summary || summary.practiced <= 0) return null;
+        return {
+            name: s.name,
+            accuracy: Math.round((summary.correct / summary.practiced) * 100)
+        };
+    }).filter(Boolean);
 
     if (subjectAccuracy.length < 3) {
         canvas.style.display = 'none';
@@ -2970,12 +3153,32 @@ function drawAccuracyChart() {
 }
 
 function getAccuracyTrendData() {
-    // 按考试记录计算每次考试的正确率
-    return examHistory.slice(0, 30).reverse().map(r => ({
-        date: r.date,
-        label: new Date(r.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }),
-        accuracy: Math.round((r.correct / r.totalQuestions) * 100)
-    }));
+    const sessionSummary = new Map();
+    getTrackedPracticeLogRecords().forEach(record => {
+        const key = record.sessionId || record.id;
+        if (!sessionSummary.has(key)) {
+            sessionSummary.set(key, {
+                date: record.date,
+                totalQuestions: 0,
+                correct: 0
+            });
+        }
+        const summary = sessionSummary.get(key);
+        summary.totalQuestions += record.totalQuestions;
+        summary.correct += record.correct;
+        if (new Date(record.date) > new Date(summary.date)) {
+            summary.date = record.date;
+        }
+    });
+
+    return [...sessionSummary.values()]
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(-30)
+        .map(record => ({
+            date: record.date,
+            label: new Date(record.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }),
+            accuracy: Math.round((record.correct / record.totalQuestions) * 100)
+        }));
 }
 
 // =============================================
@@ -2984,15 +3187,15 @@ function getAccuracyTrendData() {
 function getPracticeData(period) {
     const now = new Date();
     const data = {};
-    examHistory.forEach(r => {
-        const rd = new Date(r.date);
+    getTrackedPracticeLogRecords().forEach(record => {
+        const rd = new Date(record.date);
         const diff = Math.floor((now - rd) / 86400000);
         if (period === '7' && diff > 7) return;
         if (period === '30' && diff > 30) return;
         const key = rd.toLocaleDateString('zh-CN');
         if (!data[key]) data[key] = { date: key, questions: 0, correct: 0 };
-        data[key].questions += r.totalQuestions;
-        data[key].correct += r.correct;
+        data[key].questions += record.totalQuestions;
+        data[key].correct += record.correct;
     });
     const days = period === '7' ? 7 : (period === '30' ? 30 : Math.max(30, Object.keys(data).length));
     const result = [];
@@ -3163,7 +3366,12 @@ function executeModalCallback(id) {
     }
 }
 
-function showConfirmWithOptions(message, options) {
+function formatConfirmMessage(message, allowHtml = false) {
+    if (allowHtml) return String(message);
+    return escapeHtml(String(message)).replace(/\n/g, '<br>');
+}
+
+function showConfirmWithOptions(message, options, allowHtml = false) {
     const uuid = Date.now().toString(36) + Math.random().toString(36).slice(2);
     const btns = options.map((o, i) => {
         const callbackId = `${uuid}_${i}`;
@@ -3175,7 +3383,7 @@ function showConfirmWithOptions(message, options) {
         `;
     }).join('');
     showModal(`
-        <div class="confirm-msg">${message}</div>
+        <div class="confirm-msg">${formatConfirmMessage(message, allowHtml)}</div>
         <div class="modal-actions modal-actions-col">${btns}</div>
     `);
 }
