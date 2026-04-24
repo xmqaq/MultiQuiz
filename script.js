@@ -172,6 +172,15 @@ function normalizeQuestionContent(text) {
     return String(text || '').replace(/\s+/g, ' ').trim();
 }
 
+function sanitizeCssToken(value) {
+    return String(value || '')
+        .trim()
+        .replace(/[^\w\u4e00-\u9fa5-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 40);
+}
+
 function getQuestionAnswerValue(question) {
     return question?.answer ?? question?.correctAnswer ?? '';
 }
@@ -558,11 +567,15 @@ function clearSubjectAssociatedData(subject) {
         record.subjectId === subjectId ||
         (Array.isArray(record.questions) && record.questions.some(question => (question.subjectId || record.subjectId) === subjectId))
     );
+    const removedExamRecordIds = new Set(subjectExamRecords.map(record => String(record.id)));
 
     const removedWrongCount = wrongQuestions.filter(q => q.subjectId === subjectId).length;
     wrongQuestions = wrongQuestions.filter(q => q.subjectId !== subjectId);
     examHistory = examHistory.filter(record => !subjectExamRecords.includes(record));
-    practiceLog = practiceLog.filter(record => record.subjectId !== subjectId);
+    practiceLog = practiceLog.filter(record =>
+        record.subjectId !== subjectId &&
+        (!record.sourceExamRecordId || !removedExamRecordIds.has(String(record.sourceExamRecordId)))
+    );
 
     for (const qid of Object.keys(questionTags)) {
         if (subjectQuestionIds.has(qid)) {
@@ -1297,7 +1310,9 @@ function parseExcel(file, subjectName) {
                 const wb = XLSX.read(e.target.result, { type: 'binary' });
                 const ws = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                importQuestions(parseExcelRows(rows), subjectName);
+                const parsed = parseExcelRows(rows);
+                if (parsed.length === 0) { showToast('未找到有效题目，请检查 Excel 格式', 'error'); return; }
+                importQuestions(parsed, subjectName);
             } catch (err) { showToast('文件解析失败', 'error'); }
         };
         reader.readAsBinaryString(file);
@@ -1494,7 +1509,11 @@ function displayBrowseQuestions(questionsToShow) {
 function renderQuestionTagsHtml(questionId) {
     const tags = questionTags[questionId] || [];
     if (tags.length === 0) return '';
-    return `<div class="q-tags q-tags-inline">${tags.map(t => `<span class="q-tag tag-${t}">${escapeHtml(t)}</span>`).join('')}</div>`;
+    return `<div class="q-tags q-tags-inline">${tags.map(tag => {
+        const safeClass = sanitizeCssToken(tag);
+        const className = safeClass ? `q-tag tag-${safeClass}` : 'q-tag';
+        return `<span class="${className}">${escapeHtml(tag)}</span>`;
+    }).join('')}</div>`;
 }
 
 function renderQuestionItem(q, i) {
@@ -2785,6 +2804,7 @@ function retakeExam(recordId) {
         isWrongPractice: false
     };
     updateExamInteractionState();
+    saveExamSession();
     switchTab('exam');
     setTimeout(() => {
         document.getElementById('examSetup').style.display = 'none';
@@ -3005,6 +3025,8 @@ function renderRadarChart() {
 
     const n = subjectAccuracy.length;
     const angleStep = (Math.PI * 2) / n;
+    const labelDistance = rect.width < 420 ? 22 : 25;
+    const maxLabelChars = rect.width < 420 ? 4 : 6;
 
     ctx.clearRect(0, 0, W, H);
 
@@ -3026,11 +3048,10 @@ function renderRadarChart() {
     // 绘制轴线和标签
     ctx.fillStyle = '#6b7280';
     ctx.font = '12px sans-serif';
-    ctx.textAlign = 'center';
     subjectAccuracy.forEach((s, i) => {
         const angle = angleStep * i - Math.PI / 2;
-        const x = cx + Math.cos(angle) * (radius + 25);
-        const y = cy + Math.sin(angle) * (radius + 25);
+        const x = cx + Math.cos(angle) * (radius + labelDistance);
+        const y = cy + Math.sin(angle) * (radius + labelDistance);
 
         // 轴线
         ctx.beginPath();
@@ -3038,8 +3059,23 @@ function renderRadarChart() {
         ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
         ctx.stroke();
 
-        // 标签
-        ctx.fillText(s.name, x, y);
+        const labelLines = [];
+        const rawName = String(s.name || '').trim();
+        for (let idx = 0; idx < rawName.length; idx += maxLabelChars) {
+            labelLines.push(rawName.slice(idx, idx + maxLabelChars));
+        }
+        if (labelLines.length > 2) {
+            const secondLine = labelLines[1].slice(0, Math.max(1, maxLabelChars - 1));
+            labelLines.splice(2);
+            labelLines[1] = `${secondLine}…`;
+        }
+
+        ctx.textAlign = x < cx - 6 ? 'right' : (x > cx + 6 ? 'left' : 'center');
+        ctx.textBaseline = 'middle';
+        labelLines.forEach((line, lineIndex) => {
+            const offsetY = (lineIndex - (labelLines.length - 1) / 2) * 14;
+            ctx.fillText(line, x, y + offsetY);
+        });
     });
 
     // 绘制数据多边形
