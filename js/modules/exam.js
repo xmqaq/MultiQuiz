@@ -116,12 +116,27 @@ function startExam() {
 function smartSelectQuestions(pool, count, options) {
     const { wrongFirst, weighted, tagged } = options;
 
+    // 预处理错题数据，避免为每道候选题重复遍历错题本。
+    const wrongIdSet = new Set();
+    const wrongCountMap = new Map();
+    if (wrongFirst || weighted) {
+        wrongQuestions.forEach(w => {
+            const key = questionIdKey(w.id);
+            wrongIdSet.add(key);
+            if (weighted) {
+                wrongCountMap.set(key, (wrongCountMap.get(key) || 0) + 1);
+            }
+        });
+    }
+
     // 计算每道题的权重
     const weightedPool = pool.map(q => {
         let weight = 1;
 
         // 错题权重提高
-        if (wrongFirst && wrongQuestions.some(w => w.id === q.id)) {
+        const questionKey = questionIdKey(q.id);
+
+        if (wrongFirst && wrongIdSet.has(questionKey)) {
             weight += 5;
         }
 
@@ -132,8 +147,7 @@ function smartSelectQuestions(pool, count, options) {
 
         // 加权抽题：根据正确率调整
         if (weighted) {
-            // 根据错题次数降低权重（错得越多，权重越高，越容易被抽到）
-            const wrongCount = wrongQuestions.filter(w => w.id === q.id).length;
+            const wrongCount = wrongCountMap.get(questionKey) || 0;
             weight += wrongCount * 2;
         }
 
@@ -319,7 +333,10 @@ function submitExam() {
             }))
         };
         examHistory.unshift(record);
-        if (examHistory.length > 50) examHistory = examHistory.slice(0, 50);
+        if (examHistory.length > 50) {
+            examHistory = examHistory.slice(0, 50);
+            showToast('历史记录已达上限（50条），最早的记录已被自动删除', 'info');
+        }
         safeSetItem('examHistory', JSON.stringify(examHistory));
     }
 
