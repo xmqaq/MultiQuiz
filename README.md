@@ -266,6 +266,7 @@ MultiQuiz/
 │   └── ui/
 │       ├── modal.js               # 模态框组件
 │       ├── sidebar.js             # 侧边栏与导航
+│       ├── events.js              # 静态页面事件绑定
 │       ├── toast.js               # 消息提示
 │       └── responsive.js          # 响应式适配
 └── templates/
@@ -294,7 +295,7 @@ MultiQuiz/
 | `js/state/` | 全局状态、持久化、历史数据修复 |
 | `js/modules/` | 题库、导入、浏览、考试、错题、历史、统计、备份等业务逻辑 |
 | `js/render/` | 各页面和图表的 DOM 渲染 |
-| `js/ui/` | 弹窗、Toast、侧边栏、响应式行为 |
+| `js/ui/` | 弹窗、Toast、侧边栏、静态事件绑定、响应式行为 |
 
 ### 本地检查
 

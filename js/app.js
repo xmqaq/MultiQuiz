@@ -16,6 +16,7 @@ function initApp() {
 
     loadData();
     initNavigation();
+    initStaticEventBindings();
     initFileUpload();
     initSearch();
     initSidebarState();
