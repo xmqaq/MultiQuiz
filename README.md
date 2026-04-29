@@ -238,6 +238,7 @@ MultiQuiz/
 ├── index.html                     # 页面结构与主要视图
 ├── styles.css                     # 全局样式与响应式布局
 ├── script.js                      # 应用启动入口
+├── vue-app/                       # Vue 3 + Vite + TypeScript 重构版（旁路开发）
 ├── js/
 │   ├── app.js                     # 应用初始化与全局渲染入口
 │   ├── core/
@@ -310,6 +311,18 @@ python3 -m http.server 8000
 ```
 
 然后访问 `http://localhost:8000`，确认导入、浏览、答题、错题本、历史记录和统计页能正常使用。
+
+### Vue 重构版
+
+`vue-multiquiz` 分支中新增了旁路 Vue 版，旧版根目录保持不变：
+
+```bash
+cd vue-app
+npm install
+npm run dev
+```
+
+Vue 版继续兼容旧版 `localStorage` / `sessionStorage` 数据和 `version: "2.0"` 备份格式。第一版不引入登录、后端或云同步。
 
 ## 设计原则
 

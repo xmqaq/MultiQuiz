@@ -1,3 +1,7 @@
 *.json
 !templates/*.json
+!vue-app/package.json
+!vue-app/package-lock.json
+!vue-app/tsconfig.json
+!vue-app/tsconfig.node.json
 .DS_Store
