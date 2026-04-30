@@ -4,6 +4,7 @@ import { useExamStore } from '@/stores/exam';
 import { useLibraryStore } from '@/stores/library';
 import { useUiStore } from '@/stores/ui';
 import { formatDateTime, today } from '@/services/utils';
+import TabIcon from '@/components/common/TabIcon.vue';
 
 const library = useLibraryStore();
 const exam = useExamStore();
@@ -51,7 +52,7 @@ function clearWrong() {
         >练习错题</button>
         <button
           v-if="library.wrongQuestions.length"
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost"
           type="button"
           @click="clearWrong"
         >清空</button>
@@ -60,21 +61,29 @@ function clearWrong() {
 
     <!-- Overview -->
     <div v-if="library.wrongQuestions.length" class="overview-grid">
-      <div class="overview-card">
+      <div class="overview-card wrong-overview-total">
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="wrong" /></span>
         <span class="metric-number">{{ library.wrongQuestions.length }}</span>
         <span class="metric-label">错题总数</span>
+        <span class="metric-hint">待复习任务</span>
       </div>
-      <div class="overview-card">
+      <div class="overview-card wrong-overview-today">
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="history" /></span>
         <span class="metric-number">{{ todayCount }}</span>
         <span class="metric-label">今日新增</span>
+        <span class="metric-hint">{{ todayCount ? '今天需要巩固' : '今日暂无新增' }}</span>
       </div>
-      <div class="overview-card">
+      <div class="overview-card wrong-overview-filter">
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="browse" /></span>
         <span class="metric-number">{{ wrongPool.length }}</span>
         <span class="metric-label">当前筛选</span>
+        <span class="metric-hint">{{ subjectFilter === 'all' ? '全部学科' : '筛选结果' }}</span>
       </div>
-      <div class="overview-card">
+      <div class="overview-card wrong-overview-subjects">
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="subjects" /></span>
         <span class="metric-number">{{ library.subjects.filter(s => library.wrongQuestions.some(q => q.subjectId === s.id)).length }}</span>
         <span class="metric-label">涉及学科</span>
+        <span class="metric-hint">覆盖范围</span>
       </div>
     </div>
 
@@ -121,15 +130,16 @@ function clearWrong() {
 
         <!-- Answer comparison -->
         <div class="answer-compare">
-          <span class="answer-pair">
+          <span class="answer-summary-label">作答结果</span>
+          <div class="answer-pair answer-pair-user">
             <span>你的答案</span>
             <strong class="answer-badge wrong">{{ question.userAnswer }}</strong>
-          </span>
-          <span class="answer-arrow">→</span>
-          <span class="answer-pair">
+          </div>
+          <span class="answer-separator" aria-hidden="true" />
+          <div class="answer-pair answer-pair-correct">
             <span>正确答案</span>
             <strong class="answer-badge correct">{{ question.answer }}</strong>
-          </span>
+          </div>
         </div>
       </article>
     </div>
@@ -137,6 +147,58 @@ function clearWrong() {
 </template>
 
 <style scoped>
+.header-actions .btn {
+  min-height: 40px;
+}
+
+.overview-card {
+  min-height: 92px;
+  padding: 16px;
+}
+
+.overview-icon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+}
+
+.overview-icon :deep(.tab-icon-svg) {
+  width: 16px;
+  height: 16px;
+}
+
+.wrong-overview-total .overview-icon {
+  color: var(--danger);
+  background: var(--danger-light);
+}
+
+.wrong-overview-today .overview-icon {
+  color: var(--primary);
+  background: var(--primary-surface);
+}
+
+.wrong-overview-filter .overview-icon {
+  color: var(--accent);
+  background: var(--teal-50);
+}
+
+.wrong-overview-subjects .overview-icon {
+  color: var(--highlight);
+  background: var(--highlight-light);
+}
+
+.metric-hint {
+  display: block;
+  max-width: calc(100% - 40px);
+  color: var(--text-placeholder);
+  font-size: 11px;
+  line-height: 1.2;
+}
 
 .wrong-filter {
   display: flex;
@@ -153,8 +215,12 @@ function clearWrong() {
 }
 
 .wrong-item {
-  padding: var(--card-padding-compact);
-  border-left-color: rgba(69, 94, 221, 0.55);
+  padding: 18px;
+  border-left: 2px solid rgba(69, 94, 221, 0.35);
+}
+
+.wrong-item:hover {
+  transform: none;
 }
 
 .wrong-meta {
@@ -164,49 +230,85 @@ function clearWrong() {
 }
 
 .wrong-title {
-  margin: var(--space-2) 0 var(--space-3);
-  font-size: var(--text-card-title);
+  margin: 10px 0 14px;
+  font-size: 1rem;
   font-weight: var(--weight-semibold);
   line-height: var(--leading-relaxed);
+  color: var(--text);
+}
+
+.wrong-time {
+  white-space: nowrap;
 }
 
 .option-item {
-  min-height: 40px;
-  padding: 7px var(--space-3);
+  min-height: 46px;
+  padding: 9px 12px;
+  border-color: var(--border-soft);
+  background: #fbfcfe;
 }
 
 .option-item span {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+}
+
+.option-item p {
+  margin-top: 2px;
+  color: var(--text-soft);
 }
 
 .answer-compare {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-2);
+  margin-top: 12px;
+  padding: 9px 10px;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   background: var(--gray-50);
   font-size: var(--text-body);
 }
 
+.answer-summary-label {
+  margin-right: var(--space-1);
+  color: var(--text-soft);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+}
+
 .answer-pair {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--text-muted);
+}
+
+.answer-pair > span {
+  font-size: var(--text-caption);
+}
+
+.answer-separator {
+  width: 1px;
+  height: 18px;
+  margin-inline: 2px;
+  background: var(--border);
 }
 
 .answer-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
+  min-width: 28px;
+  height: 24px;
+  border-radius: var(--radius-full);
   font-size: var(--text-caption);
   font-weight: var(--weight-bold);
 }
@@ -221,7 +323,27 @@ function clearWrong() {
   color: var(--success);
 }
 
-.answer-arrow {
-  color: var(--border-focus);
+@media (max-width: 560px) {
+  .header-actions .btn {
+    min-height: 36px;
+  }
+
+  .overview-card {
+    min-height: 96px;
+    padding: var(--space-3);
+  }
+
+  .wrong-item {
+    padding: var(--space-4);
+  }
+
+  .answer-compare {
+    align-items: flex-start;
+  }
+
+  .wrong-item-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 </style>

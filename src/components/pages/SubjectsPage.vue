@@ -46,12 +46,15 @@ async function restoreConfig(event: Event) {
 }
 
 function showManageMenu() {
-  ui.showModal('题库管理', `当前共有 ${library.subjects.length} 个学科、${totalQuestions.value} 道题。`, [
-    { label: '导出完整备份', action: () => library.exportAllBackup() },
-    { label: '题库去重', style: 'secondary', action: () => library.deduplicateLibrary() },
-    { label: '清空全部题库', style: 'danger', action: () => confirmClearAll() },
+  const html = `
+    <p class="manage-summary">当前共有 ${library.subjects.length} 个学科、${totalQuestions.value} 道题。</p>
+  `;
+  ui.showHtmlModal('题库管理', html, [
+    { label: '导出备份', style: 'secondary', description: '保存当前题库和练习数据', action: () => library.exportAllBackup() },
+    { label: '题库去重', style: 'secondary', description: '合并重复题目', action: () => library.deduplicateLibrary() },
+    { label: '清空题库', style: 'danger', description: '清空后将删除所有题库、错题、历史记录、标签和收藏。', action: () => confirmClearAll() },
     { label: '取消', style: 'ghost', action: () => {} }
-  ]);
+  ], false);
 }
 
 function confirmClearAll() {
@@ -138,9 +141,9 @@ function startWrongPractice() {
       </div>
       <div class="header-actions">
         <input ref="restoreInput" type="file" accept=".json" hidden @change="restoreConfig" />
-        <button class="btn btn-ghost" type="button" @click="openRestoreFile">导入配置</button>
-        <button class="btn btn-secondary" type="button" @click="ui.switchTab('import')">导入题库</button>
-        <button v-if="library.subjects.length" class="btn btn-ghost" type="button" @click="showManageMenu">管理</button>
+        <button class="btn btn-ghost btn-sm" type="button" @click="openRestoreFile">导入配置</button>
+        <button class="btn btn-primary btn-sm" type="button" @click="ui.switchTab('import')">导入题库</button>
+        <button v-if="library.subjects.length" class="btn btn-ghost btn-sm" type="button" @click="showManageMenu">管理</button>
       </div>
     </div>
 
@@ -328,6 +331,20 @@ function startWrongPractice() {
   flex-wrap: wrap;
   gap: var(--space-2);
   justify-content: flex-end;
+}
+
+.quick-practice-actions .btn {
+  min-height: 40px;
+  min-width: 132px;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+}
+
+.quick-practice-actions .btn-secondary {
+  color: var(--text);
+  background: var(--surface);
 }
 
 .quick-practice-actions :deep(.tab-icon-svg),

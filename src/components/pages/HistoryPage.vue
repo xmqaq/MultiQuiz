@@ -237,7 +237,7 @@ function clearHistory() {
 }
 
 .history-list {
-  width: min(900px, 100%);
+  width: 100%;
 }
 
 .history-item {
@@ -245,7 +245,7 @@ function clearHistory() {
   grid-template-columns: 50px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-4);
   box-shadow: none;
 }
 

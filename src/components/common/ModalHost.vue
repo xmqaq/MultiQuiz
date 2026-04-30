@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/ui';
-import { onUnmounted, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 
 const ui = useUiStore();
 const modalRef = ref<HTMLElement | null>(null);
 const titleId = 'modal-title';
+const safeActions = computed(() => ui.modal.actions.filter(action => action.style !== 'danger' && action.style !== 'ghost'));
+const dangerActions = computed(() => ui.modal.actions.filter(action => action.style === 'danger'));
+const ghostActions = computed(() => ui.modal.actions.filter(action => action.style === 'ghost'));
+const hasDangerActions = computed(() => dangerActions.value.length > 0);
+const dangerDescription = computed(() => dangerActions.value.find(action => action.description)?.description || '此操作可能删除数据，请谨慎处理。');
 
 let previousActiveElement: HTMLElement | null = null;
 
@@ -82,7 +87,53 @@ onUnmounted(() => {
       </div>
       <div v-if="ui.modal.html" class="modal-body" v-html="ui.modal.html" />
       <div v-else class="modal-body">{{ ui.modal.message }}</div>
-      <div class="modal-actions">
+      <div v-if="hasDangerActions" class="modal-actions modal-actions-grouped">
+        <div v-if="safeActions.length" class="modal-safe-actions">
+          <button
+            v-for="(action, index) in safeActions"
+            :key="`safe-${index}`"
+            class="modal-action-card"
+            :class="{
+              'primary': !action.style || action.style === 'primary',
+              'secondary': action.style === 'secondary'
+            }"
+            type="button"
+            @click="ui.runModalAction(action)"
+          >
+            <strong>{{ action.label }}</strong>
+            <span v-if="action.description">{{ action.description }}</span>
+          </button>
+        </div>
+        <div class="modal-danger-zone">
+          <div>
+            <strong>危险操作</strong>
+            <span>{{ dangerDescription }}</span>
+          </div>
+          <div class="modal-danger-actions">
+            <button
+              v-for="(action, index) in dangerActions"
+              :key="`danger-${index}`"
+              class="btn btn-danger-subtle"
+              type="button"
+              @click="ui.runModalAction(action)"
+            >
+              {{ action.label }}
+            </button>
+          </div>
+        </div>
+        <div v-if="ghostActions.length" class="modal-cancel-actions">
+          <button
+            v-for="(action, index) in ghostActions"
+            :key="`ghost-${index}`"
+            class="btn btn-ghost"
+            type="button"
+            @click="ui.runModalAction(action)"
+          >
+            {{ action.label }}
+          </button>
+        </div>
+      </div>
+      <div v-else class="modal-actions">
         <button
           v-for="(action, index) in ui.modal.actions"
           :key="index"
@@ -187,6 +238,104 @@ onUnmounted(() => {
   margin-top: 20px;
 }
 
+.modal-safe-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modal-actions-grouped {
+  display: grid;
+  justify-content: stretch;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.modal-action-card {
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  min-height: 66px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.modal-action-card:hover {
+  border-color: rgba(69, 94, 221, 0.22);
+  background: var(--primary-surface);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.modal-action-card strong {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.modal-action-card span {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.modal-danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgba(217, 74, 74, 0.14);
+  border-radius: var(--radius-lg);
+  background: var(--danger-light);
+}
+
+.modal-danger-zone > div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.modal-danger-zone strong {
+  color: var(--text);
+  font-size: var(--text-body);
+}
+
+.modal-danger-zone span {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--leading-relaxed);
+}
+
+.modal-danger-actions,
+.modal-cancel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-danger-subtle {
+  border-color: rgba(217, 74, 74, 0.22);
+  background: var(--surface);
+  color: var(--danger);
+}
+
+.btn-danger-subtle:hover {
+  border-color: rgba(217, 74, 74, 0.34);
+  background: var(--red-100);
+  color: var(--danger-dark);
+}
+
+.modal-body :deep(.manage-summary) {
+  margin: 0;
+  padding-bottom: 2px;
+}
+
 /* Detail content rendered via v-html in HistoryPage */
 .modal-body :deep(.detail-questions) {
   display: grid;
@@ -255,6 +404,24 @@ onUnmounted(() => {
   .modal-box {
     padding: 16px;
     border-radius: var(--radius-xl);
+  }
+
+  .modal-safe-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-danger-zone {
+    display: grid;
+  }
+
+  .modal-danger-actions,
+  .modal-cancel-actions {
+    justify-content: stretch;
+  }
+
+  .modal-danger-actions .btn,
+  .modal-cancel-actions .btn {
+    width: 100%;
   }
 
   .modal-body :deep(.detail-summary) {

@@ -239,11 +239,19 @@ const insight = computed(() => {
             <span class="subject-tag">{{ weakestSubject.name }}</span>
             <span class="weak-count">{{ weakestSubject.detail }}</span>
           </div>
+          <p class="weak-suggestion">建议先完成该学科错题，再进行一次快速练习巩固。</p>
+          <button
+            v-if="library.wrongQuestions.length"
+            class="btn btn-secondary btn-block weak-action"
+            type="button"
+            @click="ui.switchTab('wrong')"
+          >练习错题</button>
         </div>
         <div v-else class="card-container analysis-card pending-card">
           <h3 class="analysis-card-title">{{ hasPractice ? '数据积累中' : '学习建议' }}</h3>
           <p>{{ hasPractice ? '继续完成更多不同学科的练习后，系统将识别更可靠的薄弱环节。' : '完成一次模拟答题后，系统将根据正确率、错题数量和练习记录识别需要加强的学科。' }}</p>
         </div>
+
       </div>
     </div>
 
@@ -264,17 +272,19 @@ const insight = computed(() => {
         <strong>等待练习记录</strong>
         <span>完成更多练习后，这里会展示你的练习趋势。</span>
       </div>
-      <div v-else class="trend-chart" :class="{ 'trend-chart-week': stats.period === '7' }">
+      <div v-else class="trend-chart" :class="`trend-period-${stats.period}`">
         <div
-          v-for="item in stats.practiceTrend"
+          v-for="(item, index) in stats.practiceTrend"
           :key="item.date"
           class="trend-bar"
           :class="{ 'is-empty': item.questions === 0 }"
           :title="`${item.date}: ${item.questions} 题`"
         >
-          <strong v-if="stats.period === '7'" class="trend-value">{{ item.questions }}</strong>
+          <strong v-if="item.questions > 0 || stats.period === '7'" class="trend-value">{{ item.questions }}</strong>
           <div class="trend-fill" :style="{ height: `${Math.max(4, item.questions / maxTrend * 100)}%` }" />
-          <span>{{ item.label }}</span>
+          <span
+            :class="{ muted: stats.period === '30' && index % 5 !== 0 && index !== stats.practiceTrend.length - 1 }"
+          >{{ item.label }}</span>
         </div>
       </div>
     </div>
@@ -440,13 +450,15 @@ const insight = computed(() => {
 .metric-box {
   position: relative;
   display: grid;
-  gap: 3px;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-soft);
-  background: var(--surface);
-  min-height: 78px;
+  gap: 4px;
   align-content: center;
+  min-height: 72px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+  overflow: hidden;
 }
 
 .metric-icon {
@@ -493,20 +505,23 @@ const insight = computed(() => {
   color: var(--text);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+  max-width: calc(100% - 40px);
 }
 
 .metric-box-num.text-success { color: var(--success); }
 .metric-box-num.text-warn { color: var(--danger); }
 
 .metric-box-label {
-  font-size: var(--text-body);
+  font-size: var(--text-caption);
   font-weight: var(--weight-medium);
-  color: var(--text-soft);
+  color: var(--text-muted);
+  max-width: calc(100% - 40px);
 }
 
 .metric-box-hint {
   font-size: var(--text-caption);
   color: var(--text-muted);
+  max-width: calc(100% - 40px);
 }
 
 /* ── Analysis Grid ── */
@@ -514,14 +529,20 @@ const insight = computed(() => {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: var(--space-4);
-  align-items: start;
+  align-items: stretch;
 }
 
 .analysis-left,
 .analysis-right {
   display: grid;
+  grid-template-rows: minmax(260px, auto) minmax(0, 1fr);
   gap: var(--space-4);
-  align-content: start;
+  align-content: stretch;
+}
+
+.analysis-left > .analysis-card,
+.analysis-right > .analysis-card {
+  min-height: 0;
 }
 
 .analysis-card {
@@ -657,30 +678,72 @@ const insight = computed(() => {
   font-size: var(--text-caption);
 }
 
-.trend-chart.trend-chart-week {
-  width: min(680px, 100%);
-  height: 170px;
-  grid-template-columns: repeat(7, minmax(48px, 1fr));
-  justify-content: center;
-  justify-items: center;
-  gap: var(--space-2);
-  margin: var(--space-2) auto 0;
-  padding: var(--space-3) var(--space-4) var(--space-2);
+.weak-suggestion {
+  margin: var(--space-3) 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+}
+
+.weak-action {
+  margin-top: var(--space-3);
+}
+
+.accuracy-card,
+.weak-card {
+  min-height: 260px;
+}
+
+.weak-card {
+  display: grid;
+  align-content: start;
+}
+
+.trend-chart {
+  --trend-gap: 8px;
+  height: 190px;
+  display: grid;
+  grid-template-columns: repeat(var(--trend-count, 7), minmax(0, 1fr));
+  align-items: end;
+  gap: var(--trend-gap);
+  margin-top: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(180deg, rgba(246, 248, 251, 0.72), rgba(255, 255, 255, 0.94)),
+    linear-gradient(180deg, rgba(246, 248, 251, 0.72), rgba(255, 255, 255, 0.94) 58%),
     var(--surface);
+  box-shadow: inset 0 -1px 0 rgba(17, 22, 32, 0.03);
 }
 
-.trend-chart-week .trend-bar {
+.trend-period-7 {
+  --trend-count: 7;
+  --trend-gap: 12px;
+}
+
+.trend-period-30 {
+  --trend-count: 30;
+  --trend-gap: 5px;
+}
+
+.trend-period-all {
+  --trend-count: 30;
+  --trend-gap: 5px;
+}
+
+.trend-bar {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 22px minmax(0, 1fr) 18px;
   width: 100%;
-  grid-template-rows: auto 1fr auto;
   justify-items: center;
   gap: 6px;
 }
 
-.trend-chart-week .trend-value {
+.trend-value {
+  grid-row: 1;
   color: var(--text-soft);
   font-size: var(--text-caption);
   font-weight: var(--weight-semibold);
@@ -688,29 +751,63 @@ const insight = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
-.trend-chart-week .trend-fill {
-  width: 24px;
+.trend-fill {
+  grid-row: 2;
+  align-self: end;
+  width: min(26px, 72%);
   min-height: 6px;
   border-radius: var(--radius-full) var(--radius-full) 4px 4px;
   background: linear-gradient(180deg, var(--primary), #6f8af2);
+  transition: height var(--transition-slow);
 }
 
-.trend-chart-week .trend-bar.is-empty .trend-fill {
+.trend-bar.is-empty .trend-value {
+  color: transparent;
+}
+
+.trend-bar.is-empty .trend-fill {
+  width: min(24px, 70%);
   min-height: 4px;
   background: var(--gray-150);
+  opacity: 0.65;
 }
 
-.trend-chart-week .trend-bar span {
+.trend-bar span {
+  grid-row: 3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+  color: var(--text-muted);
   font-size: 11px;
   transform: none;
   transform-origin: center;
   line-height: 1;
+  white-space: nowrap;
+}
+
+.trend-bar span.muted {
+  opacity: 0;
+}
+
+.trend-period-30 .trend-fill,
+.trend-period-all .trend-fill {
+  width: min(18px, 78%);
+}
+
+.trend-period-30 .trend-bar,
+.trend-period-all .trend-bar {
+  grid-template-rows: 18px minmax(0, 1fr) 16px;
+}
+
+.trend-period-30 .trend-value,
+.trend-period-all .trend-value {
+  font-size: 10px;
 }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .stats-header {
-    flex-direction: column;
+    display: none;
   }
 
   .insight-banner {
@@ -751,25 +848,38 @@ const insight = computed(() => {
 
   .metric-box {
     padding: var(--space-3);
-    min-height: 76px;
+    min-height: 72px;
   }
 
   .metric-box-num {
     font-size: var(--text-section-title);
   }
 
-  .trend-chart.trend-chart-week {
-    height: 146px;
-    grid-template-columns: repeat(7, minmax(30px, 1fr));
-    gap: var(--space-2);
-    padding-inline: var(--space-2);
+  .trend-chart {
+    height: 156px;
+    gap: 4px;
+    padding: var(--space-3) var(--space-2) var(--space-2);
   }
 
-  .trend-chart-week .trend-fill {
-    width: 18px;
+  .trend-period-7 {
+    --trend-gap: 8px;
   }
 
-  .trend-chart-week .trend-value {
+  .trend-period-30 .trend-bar,
+  .trend-period-all .trend-bar {
+    grid-template-rows: 18px minmax(0, 1fr);
+  }
+
+  .trend-period-30 .trend-bar span,
+  .trend-period-all .trend-bar span {
+    display: none;
+  }
+
+  .trend-fill {
+    width: min(18px, 72%);
+  }
+
+  .trend-value {
     font-size: 10px;
   }
 }

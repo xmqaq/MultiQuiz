@@ -46,6 +46,12 @@ function addCustomTag(questionId: string) {
 
     <!-- Toolbar -->
     <div class="card-container browse-toolbar">
+      <div class="browse-toolbar-head">
+        <div>
+          <strong>筛选条件</strong>
+          <span>{{ browse.filteredQuestions.length }} / {{ library.totalQuestions }} 道题</span>
+        </div>
+      </div>
       <div class="filter-grid" :class="{ 'filters-open': ui.mobileBrowseFiltersOpen }">
         <label>
           <span>学科</span>
@@ -152,16 +158,73 @@ function addCustomTag(questionId: string) {
 <style scoped>
 
 .browse-toolbar {
-  padding: var(--space-3);
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background:
+    linear-gradient(180deg, rgba(242, 245, 255, 0.45), rgba(255, 255, 255, 0) 72px),
+    var(--surface);
+}
+
+.browse-toolbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--primary);
+  opacity: 0.65;
+}
+
+.browse-toolbar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
+.browse-toolbar-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.browse-toolbar-head strong {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
+.browse-toolbar-head span {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+
 .filter-grid {
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .filter-grid label {
-  gap: 3px;
+  gap: 5px;
+  min-width: 0;
+}
+
+.filter-grid label > span {
+  color: var(--text-soft);
+  font-weight: var(--weight-semibold);
+}
+
+.filter-grid .select-control,
+.filter-grid .form-input {
+  min-height: 42px;
+  border-color: var(--border-soft);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 1px 0 rgba(17, 22, 32, 0.02);
+}
+
+.filter-grid .select-control:hover,
+.filter-grid .form-input:hover {
+  border-color: var(--border-focus);
 }
 
 .questions-list {
@@ -169,7 +232,11 @@ function addCustomTag(questionId: string) {
 }
 
 .question-card {
-  padding: var(--card-padding-compact);
+  padding: 18px;
+}
+
+.question-card:hover {
+  transform: none;
 }
 
 .q-meta,
@@ -180,25 +247,51 @@ function addCustomTag(questionId: string) {
 }
 
 .q-title {
-  margin: var(--space-2) 0 var(--space-3);
+  margin: 10px 0 14px;
+  font-size: 1rem;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-relaxed);
+  color: var(--text);
+}
+
+.q-actions {
+  gap: 4px;
+}
+
+.q-actions .icon-btn {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  color: var(--gray-500);
+}
+
+.q-actions .icon-btn:hover {
+  background: var(--gray-75);
+  color: var(--primary);
 }
 
 .option-grid {
-  gap: var(--space-2);
+  gap: 10px;
 }
 
 .option-item {
-  min-height: 40px;
-  padding: 7px var(--space-3);
+  min-height: 46px;
+  padding: 9px 12px;
+  border-color: var(--border-soft);
+  background: #fbfcfe;
 }
 
 .option-item span {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
 }
 
 .option-item p {
-  margin-top: 1px;
+  margin-top: 2px;
+  color: var(--text-soft);
 }
 
 .question-tags {
@@ -206,6 +299,46 @@ function addCustomTag(questionId: string) {
 }
 
 .answer-row {
-  margin-top: var(--space-2);
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: transparent;
+}
+
+.answer-value > span {
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
+
+.answer-value strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: var(--success-light);
+  color: var(--success);
+  font-size: var(--text-caption);
+}
+
+@media (max-width: 560px) {
+  .question-card {
+    padding: var(--space-4);
+  }
+}
+
+@media (max-width: 900px) {
+  .browse-toolbar:has(.filter-grid:not(.filters-open)) {
+    display: none;
+  }
+
+  .browse-toolbar {
+    padding: var(--space-3);
+  }
+
+  .browse-toolbar-head {
+    margin-bottom: var(--space-2);
+  }
 }
 </style>

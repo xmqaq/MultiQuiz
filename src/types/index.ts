@@ -129,5 +129,6 @@ export interface ToastMessage {
 export interface ModalAction {
   label: string;
   style?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  description?: string;
   action: () => void;
 }
