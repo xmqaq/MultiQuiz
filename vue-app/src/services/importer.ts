@@ -12,7 +12,10 @@ export async function parseExcel(file: File): Promise<Question[]> {
   const XLSX = await import('xlsx');
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const sheetName = workbook.SheetNames[0];
+  if (!sheetName) throw new Error('Excel 文件中没有工作表');
+  const sheet = workbook.Sheets[sheetName];
+  if (!sheet) throw new Error(`找不到工作表: ${sheetName}`);
   const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
   return parseExcelRows(rows);
 }

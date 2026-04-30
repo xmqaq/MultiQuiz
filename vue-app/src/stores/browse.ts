@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import type { Question } from '@/types';
-import { saveBrowseAnswerMode } from '@/services/storage';
 import { questionIdKey } from '@/services/utils';
 import { useLibraryStore } from './library';
 
@@ -25,11 +24,7 @@ export const useBrowseStore = defineStore('browse', {
       const library = useLibraryStore();
       let pool = this.subjectFilter === 'all'
         ? library.allQuestions
-        : library.subjects.find(subject => subject.id === this.subjectFilter)?.questions.map(question => ({
-            ...question,
-            _subjectId: this.subjectFilter,
-            _subjectName: library.subjects.find(subject => subject.id === this.subjectFilter)?.name || ''
-          })) || [];
+        : library.allQuestions.filter(q => q._subjectId === this.subjectFilter);
 
       const keyword = this.search.trim().toLowerCase();
       if (keyword) {
@@ -76,7 +71,6 @@ export const useBrowseStore = defineStore('browse', {
     toggleAnswerMode() {
       this.answerMode = this.answerMode === 'hide' ? 'show' : 'hide';
       if (this.answerMode === 'show') this.revealedAnswers = [];
-      saveBrowseAnswerMode(this.answerMode);
     },
     shouldShowAnswer(questionId: string) {
       return this.answerMode === 'show' || this.revealedAnswers.includes(questionIdKey(questionId));

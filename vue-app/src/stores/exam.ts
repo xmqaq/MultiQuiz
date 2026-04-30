@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import type { AnswerOption, ExamRecord, ExamSession, PracticeLogEntry, Question, WrongQuestion } from '@/types';
+import type { AnswerOption, ExamRecord, ExamSession, PracticeLogEntry, WrongQuestion } from '@/types';
 import { clearExamSession, restoreExamSession, saveExamSession } from '@/services/storage';
 import { smartSelectQuestions } from '@/services/examLogic';
-import { genId, questionIdKey, shuffleArray } from '@/services/utils';
+import { genId, shuffleArray } from '@/services/utils';
 import { useLibraryStore } from './library';
 import { useUiStore } from './ui';
 
@@ -20,10 +20,10 @@ export const useExamStore = defineStore('exam', {
   state: () => ({
     currentExam: null as ExamSession | null,
     result: null as ExamResult | null,
-    timerId: 0 as number,
+    timerId: null as number | null,
     setup: {
       subjectId: 'all',
-      count: '20',
+      count: 20 as number | 'all',
       time: 60,
       wrongFirst: false,
       weighted: false,
@@ -213,7 +213,7 @@ export const useExamStore = defineStore('exam', {
       this.stopTimer();
       if (!this.currentExam || this.currentExam.isWrongPractice) return;
       if (!this.currentExam.endTime) {
-        this.currentExam.endTime = Date.now() + (this.currentExam.timeLeft || this.currentExam.timeLimit * 60) * 1000;
+        this.currentExam.endTime = Date.now() + (this.currentExam.timeLeft ?? this.currentExam.timeLimit * 60) * 1000;
       }
       this.timerId = window.setInterval(() => {
         if (!this.currentExam) return;
@@ -224,8 +224,8 @@ export const useExamStore = defineStore('exam', {
       }, 1000);
     },
     stopTimer() {
-      if (this.timerId) window.clearInterval(this.timerId);
-      this.timerId = 0;
+      if (this.timerId !== null) window.clearInterval(this.timerId);
+      this.timerId = null;
     },
     chooseAnswer(answer: AnswerOption) {
       if (!this.currentExam || this.currentExam.completed) return;

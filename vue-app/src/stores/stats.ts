@@ -36,19 +36,23 @@ export const useStatsStore = defineStore('stats', {
         percent: Math.round((subject.questions.length / total) * 100)
       }));
     },
+    /**
+     * Consistent UTC date key to avoid timezone skew.
+     * All record dates are stored as ISO (UTC) and chart frames are
+     * computed from the same UTC baseline so keys always match.
+     */
     practiceTrend: (state): TrendPoint[] => {
       const library = useLibraryStore();
       const now = new Date();
-      const data = new Map<string, { date: string; questions: number; correct: number }>();
+      const data = new Map<string, { questions: number; correct: number }>();
       library.practiceLog
         .filter(record => record.mode !== 'legacy')
         .forEach(record => {
-          const date = new Date(record.date);
-          const diff = Math.floor((now.getTime() - date.getTime()) / 86400000);
+          const key = new Date(record.date).toISOString().slice(0, 10);
+          const diff = Math.floor((now.getTime() - new Date(record.date).getTime()) / 86400000);
           if (state.period === '7' && diff > 7) return;
           if (state.period === '30' && diff > 30) return;
-          const key = date.toLocaleDateString('zh-CN');
-          const item = data.get(key) || { date: key, questions: 0, correct: 0 };
+          const item = data.get(key) || { questions: 0, correct: 0 };
           item.questions += record.totalQuestions;
           item.correct += record.correct;
           data.set(key, item);
@@ -56,12 +60,12 @@ export const useStatsStore = defineStore('stats', {
       const days = state.period === '7' ? 7 : state.period === '30' ? 30 : Math.max(30, data.size || 0);
       return Array.from({ length: days }, (_, index) => {
         const date = new Date(now);
-        date.setDate(date.getDate() - (days - 1 - index));
-        const key = date.toLocaleDateString('zh-CN');
+        date.setUTCDate(date.getUTCDate() - (days - 1 - index));
+        const key = date.toISOString().slice(0, 10);
         const item = data.get(key);
         return {
           date: key,
-          label: `${date.getMonth() + 1}/${date.getDate()}`,
+          label: `${date.getUTCMonth() + 1}/${date.getUTCDate()}`,
           questions: item?.questions || 0,
           correct: item?.correct || 0
         };
@@ -69,16 +73,16 @@ export const useStatsStore = defineStore('stats', {
     },
     heatmapDays() {
       const library = useLibraryStore();
+      const now = new Date();
       const byDate = new Map<string, number>();
       library.practiceLog.forEach(record => {
-        const key = new Date(record.date).toLocaleDateString('zh-CN');
+        const key = new Date(record.date).toISOString().slice(0, 10);
         byDate.set(key, (byDate.get(key) || 0) + record.totalQuestions);
       });
-      const now = new Date();
       return Array.from({ length: 84 }, (_, index) => {
         const date = new Date(now);
-        date.setDate(date.getDate() - (83 - index));
-        const key = date.toLocaleDateString('zh-CN');
+        date.setUTCDate(date.getUTCDate() - (83 - index));
+        const key = date.toISOString().slice(0, 10);
         const value = byDate.get(key) || 0;
         return { date: key, value, level: value === 0 ? 0 : value < 20 ? 1 : value < 50 ? 2 : value < 100 ? 3 : 4 };
       });

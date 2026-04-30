@@ -91,7 +91,7 @@ describe('exam store', () => {
     it('creates a session and starts the timer', async () => {
       const { exam } = await setupStores();
       exam.setup.subjectId = 's1';
-      exam.setup.count = '2';
+      exam.setup.count = 2;
       exam.setup.time = 30;
 
       exam.startExam();
@@ -116,7 +116,7 @@ describe('exam store', () => {
     it('auto-adjusts when count exceeds pool', async () => {
       const { exam } = await setupStores();
       exam.setup.subjectId = 's1';
-      exam.setup.count = '100';
+      exam.setup.count = 100;
 
       exam.startExam();
 
@@ -132,7 +132,7 @@ describe('exam store', () => {
         subjects: [{ id: 'empty', name: '空', questions: [] }],
       });
       exam.setup.subjectId = 'empty';
-      exam.setup.count = '20';
+      exam.setup.count = 20;
 
       exam.startExam();
 
@@ -375,7 +375,7 @@ describe('exam store', () => {
   describe('timer', () => {
     it('decrements timeLeft and submits when time expires', async () => {
       const { exam } = await setupStores();
-      exam.setup.count = '2';
+      exam.setup.count = 2;
       exam.setup.time = 1; // 1 minute
       exam.startExam();
 
@@ -389,7 +389,7 @@ describe('exam store', () => {
 
     it('saves session periodically', async () => {
       const { exam } = await setupStores();
-      exam.setup.count = '2';
+      exam.setup.count = 2;
       exam.setup.time = 30;
       exam.startExam();
 
@@ -403,7 +403,7 @@ describe('exam store', () => {
 
     it('stopTimer clears the interval', async () => {
       const { exam } = await setupStores();
-      exam.setup.count = '2';
+      exam.setup.count = 2;
       exam.setup.time = 30;
       exam.startExam();
 

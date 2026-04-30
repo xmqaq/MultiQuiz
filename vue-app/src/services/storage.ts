@@ -1,4 +1,4 @@
-import type { AppStateSnapshot, ExamSession, PracticeLogEntry, PracticeStats } from '@/types';
+import type { AppStateSnapshot, ExamRecord, ExamSession, PracticeLogEntry, PracticeStats } from '@/types';
 import { STORAGE_KEYS } from './constants';
 import { genId } from './utils';
 import {
@@ -45,20 +45,20 @@ export function loadAppState(): AppStateSnapshot {
     }
   }
 
-  const examHistory = parseStorageJSON<any[]>(STORAGE_KEYS.examHistory, []);
+  const examHistory = parseStorageJSON<ExamRecord[]>(STORAGE_KEYS.examHistory, []);
   const consistency = ensurePracticeLogConsistency(
-    parseStorageJSON<any[]>(STORAGE_KEYS.practiceLog, []),
-    examHistory as any
+    parseStorageJSON<PracticeLogEntry[]>(STORAGE_KEYS.practiceLog, []),
+    examHistory
   );
 
   let snapshot: AppStateSnapshot = {
     subjects,
     wrongQuestions: parseStorageJSON(STORAGE_KEYS.wrongQuestions, []),
     practiceStats: consistency.practiceStats,
-    examHistory: examHistory as any,
+    examHistory,
     practiceLog: consistency.practiceLog,
     questionTags: parseStorageJSON(STORAGE_KEYS.questionTags, {}),
-    favoriteQuestionIds: parseStorageJSON<any[]>(STORAGE_KEYS.favoriteQuestionIds, []).map(id => String(id)),
+    favoriteQuestionIds: parseStorageJSON<string[]>(STORAGE_KEYS.favoriteQuestionIds, []).map(id => String(id)),
     browseAnswerMode: parseStorageJSON<string>(STORAGE_KEYS.browseAnswerMode, 'show') === 'hide' ? 'hide' : 'show',
     migratedLegacyQuestions,
     repairedQuestionIds: false
@@ -111,7 +111,7 @@ export function getSidebarCollapsed(): boolean {
 }
 
 export function savePracticeTracking(practiceLog: PracticeLogEntry[], practiceStats?: PracticeStats): boolean {
-  const normalized = practiceLog.map(normalizePracticeLogEntry).filter(Boolean) as PracticeLogEntry[];
+  const normalized = practiceLog.map(entry => normalizePracticeLogEntry(entry as unknown as Record<string, unknown>)).filter((e): e is PracticeLogEntry => e !== null);
   const stats = practiceStats || normalized.reduce(
     (acc, record) => {
       acc.practiced += record.totalQuestions;

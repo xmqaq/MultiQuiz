@@ -4,12 +4,37 @@ import App from './App.vue';
 import router from './router';
 import { type AppTab, useUiStore } from '@/stores/ui';
 import { useExamStore } from '@/stores/exam';
+import { useBrowseStore } from '@/stores/browse';
+import { saveBrowseAnswerMode, saveSidebarCollapsed } from '@/services/storage';
 import './tokens.css';
 import './styles.css';
 
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+
+// ---------------------------------------------------------------------------
+// Auto-persist lightweight stores (library store handles its own via $subscribe)
+// ---------------------------------------------------------------------------
+const ui = useUiStore();
+let uiTimer: ReturnType<typeof setTimeout> | null = null;
+ui.$subscribe((_, state) => {
+  if (uiTimer !== null) return;
+  uiTimer = setTimeout(() => {
+    uiTimer = null;
+    saveSidebarCollapsed(state.sidebarCollapsed);
+  }, 80);
+}, { detached: true });
+
+const browse = useBrowseStore();
+let browseTimer: ReturnType<typeof setTimeout> | null = null;
+browse.$subscribe((_, state) => {
+  if (browseTimer !== null) return;
+  browseTimer = setTimeout(() => {
+    browseTimer = null;
+    saveBrowseAnswerMode(state.answerMode);
+  }, 80);
+}, { detached: true });
 
 // ---------------------------------------------------------------------------
 // Navigation guard: sync route ↔ store, and block leaving an active exam

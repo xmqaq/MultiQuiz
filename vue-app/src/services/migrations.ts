@@ -11,11 +11,11 @@ import type {
 import { buildQuestionContentKey, genId, questionIdKey } from './utils';
 import { normalizeImportedQuestion } from './validators';
 
-export function normalizePracticeLogEntry(entry: any): PracticeLogEntry | null {
+export function normalizePracticeLogEntry(entry: Record<string, unknown>): PracticeLogEntry | null {
   const totalQuestions = Number(entry?.totalQuestions) || 0;
   if (totalQuestions <= 0) return null;
 
-  const parsedDate = new Date(entry?.date || Date.now());
+  const parsedDate = new Date((entry?.date as string | number | undefined) || Date.now());
   const correct = Math.max(0, Math.min(totalQuestions, Number(entry?.correct) || 0));
   const rawMode = entry?.mode;
   const mode = rawMode === 'wrong' || rawMode === 'legacy' ? rawMode : 'exam';
@@ -97,11 +97,11 @@ export function getPracticeLogSummary(records: PracticeLogEntry[]): PracticeStat
 }
 
 export function ensurePracticeLogConsistency(
-  rawPracticeLog: any[],
+  rawPracticeLog: PracticeLogEntry[],
   examHistory: ExamRecord[]
 ): { practiceLog: PracticeLogEntry[]; practiceStats: PracticeStats } {
   let practiceLog = Array.isArray(rawPracticeLog)
-    ? rawPracticeLog.map(normalizePracticeLogEntry).filter(Boolean) as PracticeLogEntry[]
+    ? rawPracticeLog.map(entry => normalizePracticeLogEntry(entry as unknown as Record<string, unknown>)).filter((e): e is PracticeLogEntry => e !== null)
     : [];
 
   if (practiceLog.length === 0) {
@@ -217,7 +217,7 @@ export function repairStoredQuestionReferences(snapshot: AppStateSnapshot): AppS
             const nextId = exactId || fallbackId;
             return nextId ? { ...question, id: nextId } : null;
           })
-          .filter(Boolean) as any
+          .filter((e): e is NonNullable<typeof e> => e !== null)
       : record.questions
   }));
 
@@ -232,7 +232,7 @@ export function repairStoredQuestionReferences(snapshot: AppStateSnapshot): AppS
   };
 }
 
-export function normalizeSubjects(rawSubjects: any[]): Subject[] {
+export function normalizeSubjects(rawSubjects: Record<string, unknown>[]): Subject[] {
   return Array.isArray(rawSubjects)
     ? rawSubjects
         .map(subject => ({

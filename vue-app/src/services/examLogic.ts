@@ -35,17 +35,19 @@ export function smartSelectQuestions(
   const targetCount = Math.min(count, pool.length);
 
   while (selected.length < targetCount && remaining.length > 0) {
-    const totalWeight = remaining.reduce((sum, question) => sum + (question.weight || 1), 0);
+    const totalWeight = remaining.reduce((sum, q) => sum + (q.weight || 1), 0);
     let random = Math.random() * totalWeight;
     let selectedIndex = 0;
     for (let i = 0; i < remaining.length; i += 1) {
-      random -= remaining[i].weight || 1;
+      random -= remaining[i]?.weight || 1;
       if (random <= 0) {
         selectedIndex = i;
         break;
       }
     }
-    selected.push(remaining[selectedIndex]);
+    const picked = remaining[selectedIndex];
+    if (!picked) break;
+    selected.push(picked);
     remaining.splice(selectedIndex, 1);
   }
 

@@ -6,7 +6,6 @@ import type {
   FavoriteQuestionId,
   PracticeLogEntry,
   PracticeStats,
-  Question,
   Subject,
   WrongQuestion
 } from '@/types';
@@ -25,6 +24,18 @@ import {
 } from '@/services/storage';
 import { downloadBlob, downloadJson, downloadText, genId, questionIdKey, today } from '@/services/utils';
 import { useUiStore } from './ui';
+
+/** Debounce helper: batches rapid calls so we only persist once per burst of mutations. */
+function debouncedPersist(store: ReturnType<typeof useLibraryStore>) {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return () => {
+    if (timer !== null) return; // already scheduled
+    timer = setTimeout(() => {
+      timer = null;
+      store.persistAll();
+    }, 80);
+  };
+}
 
 export const useLibraryStore = defineStore('library', {
   state: () => ({
@@ -63,6 +74,9 @@ export const useLibraryStore = defineStore('library', {
       if (snapshot.repairedQuestionIds) {
         ui.showToast('已修复历史题目 ID 引用', 'info');
       }
+
+      // Auto-persist on any state change (debounced).
+      this.$subscribe(debouncedPersist(this), { detached: true });
     },
     applySnapshot(snapshot: AppStateSnapshot | BackupV2) {
       this.subjects = snapshot.subjects || [];
@@ -77,19 +91,24 @@ export const useLibraryStore = defineStore('library', {
       this.cleanupOrphanFavorites();
     },
     persistAll() {
-      saveSubjects(this.subjects);
-      saveWrongQuestions(this.wrongQuestions);
-      saveExamHistory(this.examHistory);
-      saveQuestionTags(this.questionTags);
-      saveFavorites(this.favoriteQuestionIds);
-      savePracticeTracking(this.practiceLog, this.practiceStats);
+      const ok = [
+        saveSubjects(this.subjects),
+        saveWrongQuestions(this.wrongQuestions),
+        saveExamHistory(this.examHistory),
+        saveQuestionTags(this.questionTags),
+        saveFavorites(this.favoriteQuestionIds),
+        savePracticeTracking(this.practiceLog, this.practiceStats)
+      ].every(Boolean);
+      if (!ok) {
+        console.warn('Partial localStorage write failure in persistAll');
+      }
+      return ok;
     },
     cleanupOrphanFavorites() {
       const allIds = new Set(this.allQuestions.map(question => questionIdKey(question.id)));
       const next = this.favoriteQuestionIds.filter(id => allIds.has(questionIdKey(id)));
       if (next.length !== this.favoriteQuestionIds.length) {
         this.favoriteQuestionIds = next;
-        saveFavorites(this.favoriteQuestionIds);
       }
     },
     isFavorited(questionId: string) {
@@ -104,7 +123,6 @@ export const useLibraryStore = defineStore('library', {
         this.favoriteQuestionIds.push(key);
         useUiStore().showToast('已收藏该题', 'success');
       }
-      saveFavorites(this.favoriteQuestionIds);
     },
     toggleTag(questionId: string, tag: string) {
       const key = questionIdKey(questionId);
@@ -113,7 +131,6 @@ export const useLibraryStore = defineStore('library', {
       else tags.add(tag);
       this.questionTags[key] = [...tags];
       if (this.questionTags[key].length === 0) delete this.questionTags[key];
-      saveQuestionTags(this.questionTags);
     },
     addTag(questionId: string, tag: string) {
       const trimmed = tag.trim();
@@ -123,7 +140,6 @@ export const useLibraryStore = defineStore('library', {
       const tags = new Set(this.questionTags[key] || []);
       tags.add(trimmed);
       this.questionTags[key] = [...tags];
-      saveQuestionTags(this.questionTags);
     },
     async importSubject(subjectName: string, file: File, mode: 'append' | 'replace' | 'new' = 'new') {
       const ui = useUiStore();
@@ -132,19 +148,16 @@ export const useLibraryStore = defineStore('library', {
       const existing = this.subjects.find(subject => subject.name === subjectName);
       if (existing && mode === 'append') {
         existing.questions = [...existing.questions, ...questions];
-        saveSubjects(this.subjects);
         ui.showToast(`已追加 ${questions.length} 道题到「${subjectName}」`, 'success');
         return;
       }
       if (existing && mode === 'replace') {
         this.clearSubjectAssociatedData(existing.id);
         existing.questions = questions;
-        saveSubjects(this.subjects);
         ui.showToast(`已覆盖「${subjectName}」，共 ${questions.length} 道题`, 'success');
         return;
       }
       this.subjects.push({ id: genId(), name: subjectName, questions });
-      saveSubjects(this.subjects);
       ui.showToast(`成功导入 ${questions.length} 道题目到「${subjectName}」`, 'success');
     },
     renameSubject(subjectId: string, name: string) {
@@ -162,22 +175,22 @@ export const useLibraryStore = defineStore('library', {
           if (question.subjectId === subjectId) question.subjectName = trimmed;
         });
       });
-      saveSubjects(this.subjects);
-      saveWrongQuestions(this.wrongQuestions);
-      saveExamHistory(this.examHistory);
     },
     deleteSubject(subjectId: string) {
       this.clearSubjectAssociatedData(subjectId);
       this.subjects = this.subjects.filter(subject => subject.id !== subjectId);
-      saveSubjects(this.subjects);
       useUiStore().showToast('题库已删除，相关数据已同步清理', 'success');
     },
     clearSubjectAssociatedData(subjectId: string) {
       const subject = this.subjects.find(item => item.id === subjectId);
       const subjectQuestionIds = new Set(subject?.questions.map(question => questionIdKey(question.id)) || []);
+
+      // Only remove exam records that are scoped to this subject directly.
+      // Cross-subject ("all") records containing questions from this subject
+      // are kept intact — their questions from other subjects must not be lost.
       const removedRecordIds = new Set(
         this.examHistory
-          .filter(record => record.subjectId === subjectId || record.questions.some(question => question.subjectId === subjectId))
+          .filter(record => record.subjectId === subjectId)
           .map(record => record.id)
       );
       this.wrongQuestions = this.wrongQuestions.filter(question => question.subjectId !== subjectId);
@@ -191,7 +204,6 @@ export const useLibraryStore = defineStore('library', {
       });
       this.favoriteQuestionIds = this.favoriteQuestionIds.filter(id => !subjectQuestionIds.has(id));
       this.syncPracticeStats();
-      this.persistAll();
     },
     clearLibrary() {
       this.subjects = [];
@@ -201,7 +213,6 @@ export const useLibraryStore = defineStore('library', {
       this.questionTags = {};
       this.favoriteQuestionIds = [];
       this.practiceStats = { total: 0, correct: 0, practiced: 0 };
-      this.persistAll();
     },
     deduplicateLibrary() {
       const seen = new Map<string, string>();
@@ -224,25 +235,27 @@ export const useLibraryStore = defineStore('library', {
           return true;
         });
       });
-      saveSubjects(this.subjects);
       useUiStore().showToast(removed ? `已去除 ${removed} 道重复题` : '没有发现重复题', removed ? 'success' : 'info');
     },
     addWrongQuestions(records: WrongQuestion[]) {
-      const newWrongIds = new Set(records.map(question => questionIdKey(question.id)));
+      const seen = new Set<string>();
+      const deduped = records.filter(question => {
+        const key = questionIdKey(question.id);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      const newWrongIds = new Set(deduped.map(question => questionIdKey(question.id)));
       this.wrongQuestions = this.wrongQuestions.filter(question => !newWrongIds.has(questionIdKey(question.id)));
-      this.wrongQuestions = [...this.wrongQuestions, ...records];
-      saveWrongQuestions(this.wrongQuestions);
+      this.wrongQuestions = [...this.wrongQuestions, ...deduped];
     },
     removeWrongByIds(questionIds: string[]) {
       const ids = new Set(questionIds.map(questionIdKey));
       this.wrongQuestions = this.wrongQuestions.filter(question => !ids.has(questionIdKey(question.id)));
-      saveWrongQuestions(this.wrongQuestions);
     },
     clearWrongQuestions() {
       this.wrongQuestions = [];
       this.syncPracticeStats();
-      saveWrongQuestions(this.wrongQuestions);
-      savePracticeTracking(this.practiceLog, this.practiceStats);
     },
     addExamRecord(record: ExamRecord) {
       this.examHistory.unshift(record);
@@ -250,27 +263,21 @@ export const useLibraryStore = defineStore('library', {
         this.examHistory = this.examHistory.slice(0, 50);
         useUiStore().showToast('历史记录已达上限（50条），最早记录已自动删除', 'info');
       }
-      saveExamHistory(this.examHistory);
     },
     deleteExamRecord(recordId: string) {
       this.examHistory = this.examHistory.filter(record => record.id !== recordId);
       this.practiceLog = this.practiceLog.filter(record => record.sourceExamRecordId !== recordId);
       this.syncPracticeStats();
-      saveExamHistory(this.examHistory);
-      savePracticeTracking(this.practiceLog, this.practiceStats);
     },
     clearHistory() {
       const removedIds = new Set(this.examHistory.map(record => record.id));
       this.examHistory = [];
       this.practiceLog = this.practiceLog.filter(record => !record.sourceExamRecordId || !removedIds.has(record.sourceExamRecordId));
       this.syncPracticeStats();
-      saveExamHistory(this.examHistory);
-      savePracticeTracking(this.practiceLog, this.practiceStats);
     },
     addPracticeEntries(entries: PracticeLogEntry[]) {
       this.practiceLog = trimPracticeLog([...entries, ...this.practiceLog]);
       this.syncPracticeStats();
-      savePracticeTracking(this.practiceLog, this.practiceStats);
     },
     syncPracticeStats() {
       const consistency = ensurePracticeLogConsistency(this.practiceLog, this.examHistory);
@@ -294,11 +301,7 @@ export const useLibraryStore = defineStore('library', {
     exportCurrentQuestions(subjectId: string | 'all', format: 'json' | 'text' | 'print') {
       const questions = subjectId === 'all'
         ? this.allQuestions
-        : this.subjects.find(subject => subject.id === subjectId)?.questions.map(question => ({
-            ...question,
-            _subjectId: subjectId,
-            _subjectName: this.subjects.find(subject => subject.id === subjectId)?.name || ''
-          })) || [];
+        : this.allQuestions.filter(q => q._subjectId === subjectId);
       if (format === 'json') {
         downloadJson(
           subjectId === 'all'

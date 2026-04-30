@@ -60,3 +60,15 @@ export function formatDateTime(value: string): string {
   if (Number.isNaN(date.getTime())) return value || '';
   return date.toLocaleString('zh-CN');
 }
+
+/** Escape HTML special chars to prevent XSS in v-html rendered user content */
+export function escapeHtml(str: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return str.replace(/[&<>"']/g, char => map[char] || char);
+}

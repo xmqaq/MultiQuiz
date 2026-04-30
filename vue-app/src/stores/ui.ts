@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { ModalAction, ToastMessage } from '@/types';
 import { genId } from '@/services/utils';
-import { getSidebarCollapsed, saveSidebarCollapsed } from '@/services/storage';
+import { getSidebarCollapsed } from '@/services/storage';
 
 export type AppTab = 'subjects' | 'import' | 'browse' | 'exam' | 'wrong' | 'history' | 'stats';
 
@@ -59,7 +59,6 @@ export const useUiStore = defineStore('ui', {
         return;
       }
       this.sidebarCollapsed = !this.sidebarCollapsed;
-      saveSidebarCollapsed(this.sidebarCollapsed);
     },
     closeSidebar() {
       this.sidebarOpen = false;
