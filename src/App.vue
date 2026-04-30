@@ -188,7 +188,7 @@ onUnmounted(() => {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-raised);
   }
 
   .mobile-topbar-meta {

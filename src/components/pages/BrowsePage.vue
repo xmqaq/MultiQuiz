@@ -150,9 +150,6 @@ function addCustomTag(questionId: string) {
 </template>
 
 <style scoped>
-.browse-page {
-  width: min(var(--content-reading), 100%);
-}
 
 .browse-toolbar {
   padding: var(--space-3);

@@ -154,7 +154,7 @@ onUnmounted(() => {
 .modal-title {
   margin: 0;
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-extrabold);
+  font-weight: var(--weight-extrabold);
 }
 
 .modal-close {
@@ -171,7 +171,7 @@ onUnmounted(() => {
 
 .modal-close:hover {
   color: var(--text);
-  background: var(--panel-2);
+  background: var(--nav-bg);
 }
 
 .modal-body {
@@ -196,7 +196,7 @@ onUnmounted(() => {
 .modal-body :deep(.detail-q) {
   padding: 12px;
   border-radius: var(--radius-md);
-  background: var(--panel-2);
+  background: var(--nav-bg);
 }
 
 .modal-body :deep(.detail-q.correct) {
@@ -220,7 +220,7 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  background: var(--panel-2);
+  background: var(--nav-bg);
 }
 
 .modal-body :deep(.detail-summary strong) {

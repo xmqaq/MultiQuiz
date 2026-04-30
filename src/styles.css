@@ -1018,10 +1018,6 @@ a {
   align-items: start;
 }
 
-.import-page {
-  width: min(1000px, 100%);
-}
-
 .form-panel,
 .info-panel {
   padding: var(--space-5);
@@ -1138,10 +1134,6 @@ a {
 /* ═══════════════════════════════════════════════════════════════════
    EXAM SETUP
    ═══════════════════════════════════════════════════════════════════ */
-
-.exam-page {
-  width: min(1000px, 100%);
-}
 
 .exam-setup {
   display: grid;
@@ -1601,20 +1593,6 @@ a {
   text-align: right;
   color: var(--text);
   font-variant-numeric: tabular-nums;
-}
-
-.dist-track {
-  height: 5px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--gray-100);
-}
-
-.dist-track div {
-  height: 100%;
-  border-radius: inherit;
-  background: var(--primary);
-  transition: width var(--transition-slow);
 }
 
 /* Heatmap */
@@ -2147,10 +2125,6 @@ a {
     padding: var(--page-top-space) var(--content-gutter) var(--page-bottom-space);
   }
 
-  .page {
-    width: min(var(--content-max-width), 100%);
-  }
-
   .page-title {
     font-size: var(--text-page-title);
   }
@@ -2207,12 +2181,9 @@ a {
     min-height: 80px;
   }
 
-  .browse-page {
-    width: min(var(--content-reading), 100%);
-  }
 
   .wrongbook-page {
-    width: min(var(--content-reading), 100%);
+    width: min(var(--content-max-width), 100%);
   }
 
   .exam-page {
@@ -2220,7 +2191,6 @@ a {
   }
 
   .exam-live {
-    width: min(var(--content-narrow), 100%);
     gap: var(--space-2);
   }
 

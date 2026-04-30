@@ -153,8 +153,8 @@ function isActive(tabId: string): boolean {
 /* ── Nav ── */
 .sidebar-nav {
   display: grid;
-  gap: 4px;
-  padding: 22px 0 2px;
+  gap: 2px;
+  padding: 14px 0 2px;
   flex: 1;
   overflow-y: auto;
   align-content: start;

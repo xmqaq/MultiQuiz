@@ -177,9 +177,6 @@ function clearHistory() {
 </template>
 
 <style scoped>
-.history-page {
-  width: min(var(--content-reading), 100%);
-}
 
 .overview-card {
   position: relative;

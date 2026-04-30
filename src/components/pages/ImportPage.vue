@@ -230,7 +230,7 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
 <style scoped>
 /* ── Page width ── */
 .import-page {
-  width: min(1060px, 100%);
+  width: min(var(--content-max-width), 100%);
 }
 
 /* ── Panels: tighter, balanced padding ── */

@@ -137,9 +137,6 @@ function clearWrong() {
 </template>
 
 <style scoped>
-.wrongbook-page {
-  width: min(var(--content-reading), 100%);
-}
 
 .wrong-filter {
   display: flex;

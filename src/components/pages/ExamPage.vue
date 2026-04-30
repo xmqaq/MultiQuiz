@@ -258,7 +258,7 @@ onUnmounted(() => {
 }
 
 .exam-page-setup {
-  width: min(1120px, 100%);
+  width: min(var(--content-max-width), 100%);
 }
 
 .exam-setup {

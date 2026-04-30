@@ -40,8 +40,8 @@ const iconMap: Record<string, string> = {
   border-radius: var(--radius-lg);
   color: #fff;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  box-shadow: var(--shadow-lg);
+  font-weight: var(--weight-medium);
+  box-shadow: var(--shadow-raised);
   cursor: pointer;
   pointer-events: auto;
   animation: toast-in 0.25s ease;
@@ -54,7 +54,7 @@ const iconMap: Record<string, string> = {
   height: 20px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--weight-bold);
   font-size: 12px;
   line-height: 1;
   flex-shrink: 0;

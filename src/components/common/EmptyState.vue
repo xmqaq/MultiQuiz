@@ -34,7 +34,7 @@ defineProps<{
 }
 
 .empty-title {
-  font-weight: var(--font-weight-extrabold);
+  font-weight: var(--weight-extrabold);
   font-size: var(--font-size-lg);
   color: var(--text);
 }
@@ -56,6 +56,6 @@ defineProps<{
 }
 
 .compact .empty-title {
-  font-size: var(--font-size-md);
+  font-size: var(--text-card-title);
 }
 </style>
