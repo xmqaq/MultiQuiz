@@ -893,7 +893,7 @@ const insight = computed(() => {
 
   .insight-banner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: var(--space-3);
     padding: var(--space-3);
   }

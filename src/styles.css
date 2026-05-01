@@ -2032,14 +2032,6 @@ a {
     min-width: 0;
   }
 
-  .exam-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .exam-nav .btn:last-child {
-    grid-column: 1 / -1;
-  }
 
   .setup-summary,
   .stats-hero-meta,
