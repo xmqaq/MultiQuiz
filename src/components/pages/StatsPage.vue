@@ -895,7 +895,12 @@ const insight = computed(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--space-3);
+  }
+
+  .insight-banner .btn {
+    width: 100%;
+    margin-top: var(--space-2);
   }
 
   .insight-metrics {

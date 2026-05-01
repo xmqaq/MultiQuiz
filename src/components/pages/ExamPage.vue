@@ -610,18 +610,20 @@ onUnmounted(() => {
 
 @media (max-width: 760px) {
   .exam-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
   
   .exam-nav-group {
-    display: contents;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    width: 100%;
   }
   
   .exam-nav .btn {
     width: 100%;
-    padding: 0 4px;
   }
 
   .quick-start-grid {
