@@ -141,6 +141,17 @@ export const useLibraryStore = defineStore('library', {
       tags.add(trimmed);
       this.questionTags[key] = [...tags];
     },
+    deleteTag(tag: string) {
+      this.availableTags = this.availableTags.filter(t => t !== tag);
+      Object.keys(this.questionTags).forEach(key => {
+        const tags = new Set(this.questionTags[key] || []);
+        if (tags.has(tag)) {
+          tags.delete(tag);
+          this.questionTags[key] = [...tags];
+          if (this.questionTags[key].length === 0) delete this.questionTags[key];
+        }
+      });
+    },
     async importSubject(subjectName: string, file: File, mode: 'append' | 'replace' | 'new' = 'new') {
       const ui = useUiStore();
       const questions = await parseQuestionFile(file);

@@ -123,12 +123,12 @@ function clearHistory() {
         <span class="metric-label">平均得分</span>
       </div>
       <div class="overview-card overview-card-best">
-        <span class="overview-icon" aria-hidden="true"><TabIcon name="exam" /></span>
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="target" /></span>
         <span class="metric-number">{{ maxScore }}</span>
         <span class="metric-label">最高得分</span>
       </div>
       <div class="overview-card overview-card-recent">
-        <span class="overview-icon" aria-hidden="true"><TabIcon name="browse" /></span>
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="lightning" /></span>
         <span class="metric-number recent-date">{{ lastPracticeParts.date }}</span>
         <span class="recent-time">{{ lastPracticeParts.time }}</span>
         <span class="metric-label">最近练习</span>
@@ -261,8 +261,8 @@ function clearHistory() {
 }
 
 .history-score.pass {
-  background: var(--primary-surface);
-  color: var(--primary);
+  background: var(--blue-100);
+  color: var(--primary-dark);
 }
 
 .history-score.low {
@@ -298,8 +298,19 @@ function clearHistory() {
 
   .history-actions {
     grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    justify-content: flex-start;
+    gap: var(--space-2);
+  }
+
+  .history-actions .btn-primary,
+  .history-actions .btn-secondary {
+    flex: 1;
+  }
+
+  .history-actions .btn-ghost {
+    flex: 0 0 auto;
+    padding: 0 12px;
   }
 }
 </style>

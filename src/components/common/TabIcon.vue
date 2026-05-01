@@ -38,12 +38,32 @@ defineProps<{ name: AppTab }>();
       <path d="M12 8v4l3 2" />
       <path d="M4 12H2" />
     </g>
-    <g v-else>
+    <g v-else-if="name === 'stats'">
       <path d="M5 19V5" />
       <path d="M5 19h14" />
       <path d="M8 16v-5" />
       <path d="M12 16V8" />
       <path d="M16 16v-9" />
+    </g>
+    <g v-else-if="name === 'tag'">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </g>
+    <g v-else-if="name === 'layers'">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 12 12 17 22 12" />
+      <polyline points="2 17 12 22 22 17" />
+    </g>
+    <g v-else-if="name === 'target'">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </g>
+    <g v-else-if="name === 'lightning'">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </g>
+    <g v-else>
+      <circle cx="12" cy="12" r="10" />
     </g>
   </svg>
 </template>

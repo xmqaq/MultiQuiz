@@ -61,12 +61,12 @@ router.beforeEach((to, from) => {
         [
           {
             label: '继续考试',
-            style: 'secondary',
+            style: 'primary',
             action: () => { pendingNavTarget = null; },
           },
           {
             label: '离开考试',
-            style: 'danger',
+            style: 'ghost',
             action: () => {
               const target = pendingNavTarget;
               pendingNavTarget = null;

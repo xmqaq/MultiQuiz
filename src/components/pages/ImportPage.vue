@@ -233,6 +233,13 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
   width: min(var(--content-max-width), 100%);
 }
 
+.import-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
 /* ── Panels: tighter, balanced padding ── */
 .form-panel,
 .info-panel {
@@ -324,9 +331,9 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  min-height: 130px;
-  padding: var(--space-6) var(--space-4);
+  gap: var(--space-4);
+  min-height: 220px;
+  padding: var(--space-8) var(--space-4);
   border: 2px dashed var(--gray-200);
   border-radius: var(--radius-xl);
   background: var(--gray-50);
@@ -369,12 +376,17 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
 .upload-icon {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-xl);
   background: var(--primary-surface);
   color: var(--primary);
   flex-shrink: 0;
+}
+
+.upload-icon svg {
+  width: 32px;
+  height: 32px;
 }
 
 .upload-prompt {
@@ -550,6 +562,12 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
 }
 
 /* ── Responsive ── */
+@media (max-width: 900px) {
+  .import-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 560px) {
   .form-panel,
   .info-panel {
@@ -557,10 +575,13 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
   }
 
   .import-steps {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
     gap: var(--space-2);
     padding: var(--space-3);
+  }
+
+  .step-item {
+    flex: 0 0 auto;
   }
 
   .step-arrow {
@@ -575,6 +596,11 @@ async function runImport(mode: 'append' | 'replace' | 'new' = 'new') {
   .upload-zone.has-file {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .upload-zone.has-file .btn {
+    width: 100%;
   }
 }
 </style>

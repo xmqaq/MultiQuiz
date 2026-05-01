@@ -130,19 +130,19 @@ const insight = computed(() => {
     <!-- Core Metrics -->
     <div class="metrics-row">
       <div class="metric-box metric-box-questions">
-        <span class="metric-icon" aria-hidden="true"><TabIcon name="subjects" /></span>
+        <span class="metric-icon" aria-hidden="true"><TabIcon name="layers" /></span>
         <span class="metric-box-num">{{ stats.totalQuestions }}</span>
         <span class="metric-box-label">题库总量</span>
         <span class="metric-box-hint">{{ library.subjects.length }} 个学科</span>
       </div>
       <div class="metric-box metric-box-practice">
-        <span class="metric-icon" aria-hidden="true"><TabIcon name="exam" /></span>
+        <span class="metric-icon" aria-hidden="true"><TabIcon name="lightning" /></span>
         <span class="metric-box-num">{{ stats.practicedCount }}</span>
         <span class="metric-box-label">累计练习</span>
         <span class="metric-box-hint">{{ hasPractice ? '道题已练习' : '等待开始' }}</span>
       </div>
       <div class="metric-box metric-box-accuracy">
-        <span class="metric-icon" aria-hidden="true"><TabIcon name="stats" /></span>
+        <span class="metric-icon" aria-hidden="true"><TabIcon name="target" /></span>
         <span class="metric-box-num" :class="{ 'text-success': hasPractice && stats.accuracyRate >= 80, 'text-warn': hasPractice && stats.accuracyRate < 60 }">{{ accuracyDisplay }}</span>
         <span class="metric-box-label">正确率</span>
         <span class="metric-box-hint">{{ accuracyHint }}</span>
@@ -467,11 +467,12 @@ const insight = computed(() => {
   right: 12px;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-md);
   color: var(--primary);
   background: var(--primary-surface);
+  opacity: 0.8;
 }
 
 .metric-icon :deep(.tab-icon-svg) {
@@ -500,12 +501,13 @@ const insight = computed(() => {
 }
 
 .metric-box-num {
-  font-size: var(--text-metric);
+  font-size: var(--text-metric-lg);
   font-weight: var(--weight-extrabold);
   color: var(--text);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
   max-width: calc(100% - 40px);
+  margin-top: 4px;
 }
 
 .metric-box-num.text-success { color: var(--success); }
@@ -520,8 +522,9 @@ const insight = computed(() => {
 
 .metric-box-hint {
   font-size: var(--text-caption);
-  color: var(--text-muted);
+  color: var(--gray-400);
   max-width: calc(100% - 40px);
+  margin-top: 2px;
 }
 
 /* ── Analysis Grid ── */
@@ -535,7 +538,7 @@ const insight = computed(() => {
 .analysis-left,
 .analysis-right {
   display: grid;
-  grid-template-rows: minmax(260px, auto) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--space-4);
   align-content: stretch;
 }
@@ -645,10 +648,88 @@ const insight = computed(() => {
   height: 14px;
 }
 
+.heatmap-legend {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.heatmap-legend span {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--gray-100);
+}
+
+.heatmap-legend span:nth-child(2) { background: rgba(69, 94, 221, 0.3); }
+.heatmap-legend span:nth-child(3) { background: rgba(69, 94, 221, 0.6); }
+.heatmap-legend span:nth-child(4) { background: var(--primary); }
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+  gap: 4px;
+  margin-top: var(--space-3);
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--gray-100);
+}
+
+.heatmap-cell.level-1 { background: rgba(69, 94, 221, 0.3); }
+.heatmap-cell.level-2 { background: rgba(69, 94, 221, 0.6); }
+.heatmap-cell.level-3 { background: var(--primary); }
+.heatmap-cell.level-4 { background: var(--primary-dark); }
+
 .heatmap-note {
   margin: var(--space-3) 0 0;
   color: var(--text-muted);
   font-size: var(--text-caption);
+}
+
+.dist-list {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dist-name {
+  width: 80px;
+  font-size: var(--text-caption);
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dist-track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+.dist-track div {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+.dist-count {
+  width: 32px;
+  text-align: right;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
 }
 
 .weak-desc {
@@ -867,7 +948,7 @@ const insight = computed(() => {
 
   .trend-period-30 .trend-bar,
   .trend-period-all .trend-bar {
-    grid-template-rows: 18px minmax(0, 1fr);
+    grid-template-rows: 18px minmax(0, 1fr) 0;
   }
 
   .trend-period-30 .trend-bar span,

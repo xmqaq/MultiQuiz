@@ -88,7 +88,7 @@ onUnmounted(() => {
         <!-- Quick start cards -->
         <div class="quick-start-grid">
           <div class="card-content quick-start-card quick-start-all" @click="exam.setup.subjectId = 'all'; exam.setup.count = 'all'; exam.startExam()">
-            <span class="quick-start-mark" aria-hidden="true"><TabIcon name="subjects" /></span>
+            <span class="quick-start-mark" aria-hidden="true"><TabIcon name="lightning" /></span>
             <strong>全部练习</strong>
             <p>所有学科 · {{ setupQuestionCount }} 题</p>
           </div>
@@ -125,7 +125,7 @@ onUnmounted(() => {
               </select>
             </label>
             <label class="form-field">
-              <span><TabIcon name="browse" />题目数量</span>
+              <span><TabIcon name="layers" />题目数量</span>
               <select v-model="exam.setup.count" class="select-control">
                 <option :value="20">20 题（快速）</option>
                 <option :value="50">50 题（标准）</option>
@@ -146,8 +146,8 @@ onUnmounted(() => {
 
           <div class="setup-toggles">
             <label class="smart-option"><input v-model="exam.setup.wrongFirst" type="checkbox" /><TabIcon name="wrong" /><span>优先错题</span></label>
-            <label class="smart-option"><input v-model="exam.setup.weighted" type="checkbox" /><TabIcon name="stats" /><span>加权抽题</span></label>
-            <label class="smart-option"><input v-model="exam.setup.tagged" type="checkbox" /><TabIcon name="browse" /><span>优先「需复习」标签</span></label>
+            <label class="smart-option"><input v-model="exam.setup.weighted" type="checkbox" /><TabIcon name="target" /><span>加权抽题</span></label>
+            <label class="smart-option"><input v-model="exam.setup.tagged" type="checkbox" /><TabIcon name="tag" /><span>优先「需复习」标签</span></label>
             <label class="smart-option"><input v-model="exam.setup.favoritesOnly" type="checkbox" /><span class="favorite-icon" aria-hidden="true">★</span><span>只练收藏</span></label>
           </div>
 
@@ -200,17 +200,22 @@ onUnmounted(() => {
       </div>
 
       <!-- Answer card -->
-      <div v-if="answerCardOpen" class="card-content answer-card">
-        <button
-          v-for="(_, index) in exam.currentExam.questions"
-          :key="index"
-          class="answer-card-item"
-          :class="{ current: index === exam.currentExam?.currentIndex, answered: Boolean(getAnswerAtIndex(index)) }"
-          type="button"
-          :aria-label="`第${index + 1}题${getAnswerAtIndex(index) ? '·已作答' : ''}`"
-          @click="exam.jump(index); answerCardOpen = false"
-        >{{ index + 1 }}</button>
-      </div>
+      <Transition name="slide-down">
+        <div v-if="answerCardOpen" class="card-content answer-card">
+          <button
+            v-for="(q, index) in exam.currentExam.questions"
+            :key="index"
+            class="answer-card-item"
+            :class="{ current: index === exam.currentExam?.currentIndex, answered: Boolean(getAnswerAtIndex(index)) }"
+            type="button"
+            :aria-label="`第${index + 1}题${getAnswerAtIndex(index) ? '·已作答' : ''}`"
+            @click="exam.jump(index); answerCardOpen = false"
+          >
+            {{ index + 1 }}
+            <span v-if="library.isFavorited(q.id)" class="answer-card-star">★</span>
+          </button>
+        </div>
+      </Transition>
 
       <!-- Question -->
       <article class="card-content exam-question">
@@ -238,15 +243,18 @@ onUnmounted(() => {
           >
             <strong>{{ option }}</strong>
             <span>{{ question[`option${option}` as keyof typeof question] }}</span>
+            <span v-if="selectedAnswer === option" class="exam-option-check" aria-hidden="true">✓</span>
           </button>
         </div>
       </article>
 
       <!-- Nav -->
       <div class="exam-nav">
-        <button class="btn btn-secondary" type="button" :disabled="exam.currentExam.currentIndex === 0" @click="exam.prev">上一题</button>
-        <button class="btn btn-secondary" type="button" :disabled="exam.currentExam.currentIndex === exam.currentExam.questions.length - 1" @click="exam.next">下一题</button>
-        <button class="btn btn-primary" type="button" @click="exam.submit">提交答卷</button>
+        <div class="exam-nav-group">
+          <button class="btn btn-secondary" type="button" :disabled="exam.currentExam.currentIndex === 0" @click="exam.prev">上一题</button>
+          <button class="btn btn-secondary" type="button" :disabled="exam.currentExam.currentIndex === exam.currentExam.questions.length - 1" @click="exam.next">下一题</button>
+        </div>
+        <button class="btn btn-primary" :class="{ 'btn-pulse': exam.currentExam.currentIndex === exam.currentExam.questions.length - 1 }" type="button" @click="exam.submit">提交答卷</button>
       </div>
     </div>
   </section>
@@ -286,13 +294,19 @@ onUnmounted(() => {
 .quick-start-card::after {
   content: "";
   position: absolute;
-  inset: auto -24px -28px auto;
-  width: 82px;
-  height: 82px;
+  right: -20px;
+  bottom: -20px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: var(--quick-bg);
-  opacity: 0.58;
+  opacity: 0.8;
   pointer-events: none;
+  transition: transform var(--transition-base);
+}
+
+.quick-start-card:hover::after {
+  transform: scale(1.1);
 }
 
 .quick-start-standard {
@@ -438,7 +452,41 @@ onUnmounted(() => {
 }
 
 .exam-option {
-  min-height: 48px;
+  position: relative;
+  min-height: 56px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.exam-option:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-surface);
+}
+
+.exam-option:active {
+  transform: scale(0.98);
+}
+
+.exam-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-surface);
+  box-shadow: 0 2px 8px rgba(69, 94, 221, 0.15), 0 0 0 1px var(--primary);
+}
+
+.exam-option.selected strong {
+  background: var(--primary);
+  color: #fff;
+}
+
+.exam-option-check {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .result-score-unit {
@@ -457,9 +505,132 @@ onUnmounted(() => {
   max-width: 480px;
 }
 
+.answer-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+}
+
+.answer-card-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.answer-card-star {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: var(--highlight);
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.answer-card-item:hover {
+  border-color: var(--border-focus);
+}
+
+.answer-card-item.answered {
+  background: var(--primary-surface);
+  border-color: rgba(69, 94, 221, 0.2);
+  color: var(--primary-dark);
+}
+
+.answer-card-item.current {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+/* Answer Card Transition */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+  transform-origin: top;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: scaleY(0.9);
+}
+
+/* Progress Track Animation */
+.progress-track div {
+  transition: width 0.3s ease-out;
+}
+
+/* Timer Pulse Animation */
+@keyframes pulse-danger {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; color: var(--danger-dark, #d94a4a); }
+  100% { opacity: 1; }
+}
+
+.timer.danger {
+  animation: pulse-danger 1.5s infinite;
+}
+
+/* Nav Layout */
+.exam-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.exam-nav-group {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.exam-nav .btn {
+  min-width: 110px;
+}
+
+.btn-pulse {
+  animation: pulse-primary 2s infinite;
+}
+
+@keyframes pulse-primary {
+  0% { box-shadow: 0 0 0 0 rgba(69, 94, 221, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(69, 94, 221, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(69, 94, 221, 0); }
+}
+
 @media (max-width: 760px) {
+  .exam-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+  }
+  
+  .exam-nav-group {
+    display: contents;
+  }
+  
+  .exam-nav .btn {
+    width: 100%;
+    padding: 0 4px;
+  }
+
   .quick-start-grid {
     grid-template-columns: 1fr;
+  }
+
+  .setup-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 
   .setup-footer {

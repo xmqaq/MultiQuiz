@@ -3,7 +3,7 @@ import type { ModalAction, ToastMessage } from '@/types';
 import { genId } from '@/services/utils';
 import { getSidebarCollapsed } from '@/services/storage';
 
-export type AppTab = 'subjects' | 'import' | 'browse' | 'exam' | 'wrong' | 'history' | 'stats';
+export type AppTab = 'subjects' | 'import' | 'browse' | 'exam' | 'wrong' | 'history' | 'stats' | 'tag' | 'layers' | 'target' | 'lightning';
 
 interface ModalState {
   open: boolean;

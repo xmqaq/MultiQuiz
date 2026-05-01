@@ -24,6 +24,13 @@ function addCustomTag(questionId: string) {
   if (!tag) return;
   library.addTag(questionId, tag);
 }
+
+function deleteTag(tag: string) {
+  ui.showModal('删除标签', `确定要删除标签「${tag}」吗？这会将其从所有题目中移除。`, [
+    { label: '删除', style: 'danger', action: () => library.deleteTag(tag) },
+    { label: '取消', style: 'ghost', action: () => {} }
+  ]);
+}
 </script>
 
 <template>
@@ -134,9 +141,18 @@ function addCustomTag(questionId: string) {
         </div>
 
         <!-- Tag editor -->
-        <div v-if="tagEditorFor === question.id" class="tag-editor">
-          <button v-for="tag in library.availableTags" :key="tag" class="tag-chip" type="button" @click="library.toggleTag(question.id, tag)">{{ tag }}</button>
-          <button class="tag-chip" type="button" @click="addCustomTag(question.id)">+ 新标签</button>
+        <div v-if="tagEditorFor === question.id" class="tag-editor-panel">
+          <div class="tag-editor-header">
+            <span>编辑标签</span>
+            <button class="icon-btn btn-sm" type="button" @click="tagEditorFor = ''">×</button>
+          </div>
+          <div class="tag-editor-content">
+            <div v-for="tag in library.availableTags" :key="tag" class="tag-chip-wrapper">
+              <button class="tag-chip" :class="{ active: (library.questionTags[questionIdKey(question.id)] || []).includes(tag) }" type="button" @click="library.toggleTag(question.id, tag)">{{ tag }}</button>
+              <button class="tag-chip-delete" type="button" title="删除标签" @click="deleteTag(tag)">×</button>
+            </div>
+            <button class="tag-chip tag-chip-add" type="button" @click="addCustomTag(question.id)">+ 新标签</button>
+          </div>
         </div>
 
         <!-- Zone 5: Answer reveal -->
@@ -158,22 +174,8 @@ function addCustomTag(questionId: string) {
 <style scoped>
 
 .browse-toolbar {
-  position: relative;
-  overflow: hidden;
   padding: var(--space-4);
   margin-bottom: var(--space-4);
-  background:
-    linear-gradient(180deg, rgba(242, 245, 255, 0.45), rgba(255, 255, 255, 0) 72px),
-    var(--surface);
-}
-
-.browse-toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--primary);
-  opacity: 0.65;
 }
 
 .browse-toolbar-head {
@@ -294,15 +296,22 @@ function addCustomTag(questionId: string) {
   color: var(--text-soft);
 }
 
+.option-item:hover {
+  border-color: var(--border-focus);
+  background: var(--surface);
+}
+
 .question-tags {
   margin-top: var(--space-2);
 }
 
 .answer-row {
   justify-content: space-between;
-  margin-top: 10px;
-  padding: 8px 10px;
-  background: transparent;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
 }
 
 .answer-value > span {
@@ -322,6 +331,93 @@ function addCustomTag(questionId: string) {
   font-size: var(--text-caption);
 }
 
+.tag-editor-panel {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--gray-50);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+
+.tag-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  color: var(--text-soft);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+}
+
+.tag-editor-header .icon-btn {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tag-editor-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag-chip-add {
+  border-style: dashed;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.tag-chip-add:hover {
+  border-style: solid;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.tag-chip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.tag-chip-wrapper .tag-chip {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.tag-chip-wrapper .tag-chip.active {
+  background: var(--primary-surface);
+  color: var(--primary);
+}
+
+.tag-chip-delete {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tag-chip-delete:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.tag-chip-wrapper:has(.tag-chip.active) {
+  border-color: var(--primary);
+}
+
 @media (max-width: 560px) {
   .question-card {
     padding: var(--space-4);
@@ -334,11 +430,33 @@ function addCustomTag(questionId: string) {
   }
 
   .browse-toolbar {
-    padding: var(--space-3);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    z-index: 50;
+    margin: 0;
+    padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    background: var(--surface);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .browse-toolbar::before {
+    display: none;
   }
 
   .browse-toolbar-head {
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 }
 </style>

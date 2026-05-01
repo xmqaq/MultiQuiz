@@ -155,7 +155,7 @@ function startWrongPractice() {
         <span class="metric-label">学科</span>
       </div>
       <div class="overview-card overview-card-questions">
-        <span class="overview-icon" aria-hidden="true"><TabIcon name="browse" /></span>
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="layers" /></span>
         <span class="metric-number">{{ totalQuestions }}</span>
         <span class="metric-label">题目总量</span>
       </div>
@@ -247,11 +247,11 @@ function startWrongPractice() {
 
           <!-- Actions -->
           <div class="course-card-footer">
-            <button class="btn btn-primary btn-sm" type="button" @click="quickExam(subject.id)">
+            <button class="btn btn-primary btn-sm course-action-primary" type="button" @click="quickExam(subject.id)">
               <TabIcon name="exam" />
               练习
             </button>
-            <button class="btn btn-secondary btn-sm" type="button" @click="manageSubject(subject.id, 'browse')">
+            <button class="btn btn-secondary btn-sm course-action-secondary" type="button" @click="manageSubject(subject.id, 'browse')">
               <TabIcon name="browse" />
               浏览
             </button>
@@ -263,8 +263,37 @@ function startWrongPractice() {
 </template>
 
 <style scoped>
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--section-gap);
+}
+
 .overview-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 88px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+}
+
+.metric-number {
+  font-size: var(--text-metric-lg);
+  font-weight: var(--weight-extrabold);
+  color: var(--text);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-label {
+  margin-top: 4px;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
 }
 
 .overview-icon {
@@ -403,20 +432,85 @@ function startWrongPractice() {
   height: 16px;
 }
 
-.course-card .course-progress-fill {
+.course-progress {
+  display: grid;
+  gap: 6px;
+}
+
+.course-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.course-progress-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
   background: var(--course-accent);
 }
 
 .course-stats {
+  display: flex;
+  gap: var(--space-2);
   margin-top: 2px;
 }
 
 .course-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   padding: 7px var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--gray-50);
+  flex: 1;
+  text-align: center;
+}
+
+.course-stat strong {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--text-soft);
+}
+
+.course-stat span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.course-card-footer {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: auto;
 }
 
 .course-card-footer .btn {
-  min-height: 32px;
+  min-height: 36px;
+}
+
+.course-action-primary {
+  flex: 2 !important;
+  font-weight: var(--weight-bold);
+}
+
+.course-action-secondary {
+  flex: 1 !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.course-action-secondary:hover {
+  background: var(--gray-75) !important;
+  color: var(--text-soft) !important;
 }
 
 .subject-menu-wrap {

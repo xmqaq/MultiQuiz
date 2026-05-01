@@ -186,10 +186,10 @@ function isActive(tabId: string): boolean {
 }
 
 .nav-item.active {
-  color: var(--primary);
-  border-left-color: var(--primary);
-  background: var(--primary-surface);
-  font-weight: var(--weight-semibold);
+  color: var(--primary-dark);
+  border-left: 4px solid var(--primary);
+  background: var(--blue-100);
+  font-weight: var(--weight-bold);
 }
 
 /* ── Icon ── */

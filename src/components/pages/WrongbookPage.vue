@@ -68,13 +68,13 @@ function clearWrong() {
         <span class="metric-hint">待复习任务</span>
       </div>
       <div class="overview-card wrong-overview-today">
-        <span class="overview-icon" aria-hidden="true"><TabIcon name="history" /></span>
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="lightning" /></span>
         <span class="metric-number">{{ todayCount }}</span>
         <span class="metric-label">今日新增</span>
         <span class="metric-hint">{{ todayCount ? '今天需要巩固' : '今日暂无新增' }}</span>
       </div>
       <div class="overview-card wrong-overview-filter">
-        <span class="overview-icon" aria-hidden="true"><TabIcon name="browse" /></span>
+        <span class="overview-icon" aria-hidden="true"><TabIcon name="layers" /></span>
         <span class="metric-number">{{ wrongPool.length }}</span>
         <span class="metric-label">当前筛选</span>
         <span class="metric-hint">{{ subjectFilter === 'all' ? '全部学科' : '筛选结果' }}</span>
@@ -258,6 +258,28 @@ function clearWrong() {
 .option-item p {
   margin-top: 2px;
   color: var(--text-soft);
+}
+
+.option-item.correct-opt {
+  background: var(--success-light);
+  border-color: rgba(45, 159, 94, 0.3);
+}
+
+.option-item.correct-opt span {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
+.option-item.wrong-opt-item {
+  background: var(--danger-light);
+  border-color: rgba(217, 74, 74, 0.3);
+}
+
+.option-item.wrong-opt-item span {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
 }
 
 .answer-compare {
